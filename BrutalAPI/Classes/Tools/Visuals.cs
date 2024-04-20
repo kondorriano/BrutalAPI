@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BrutalAPI
 {
-    class Visuals
+    public class Visuals
     {
         static public AttackVisualsSO Abandoned => LoadedDBsHandler.MiscDB.GetVisuals("Abandoned");
         static public AttackVisualsSO Absolve => LoadedDBsHandler.MiscDB.GetVisuals("Absolve");

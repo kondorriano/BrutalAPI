@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BrutalAPI
 {
-    class Priority
+    public class Priority
     {
         static public PrioritySO ExtremelyFast => LoadedDBsHandler.MiscDB.GetPriority("ExtremelyFast");
         static public PrioritySO VeryFast => LoadedDBsHandler.MiscDB.GetPriority("VeryFast");

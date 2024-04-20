@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BrutalAPI
 {
-    class Rarity
+    public class Rarity
     {
         static public RaritySO ExtremelyCommon => LoadedDBsHandler.MiscDB.GetRarity("ExtremelyCommon");
         static public RaritySO Common => LoadedDBsHandler.MiscDB.GetRarity("Common");
