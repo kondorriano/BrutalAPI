@@ -56,11 +56,17 @@ namespace BrutalAPI
         public List<int> ignoredDPS;
 
         #region CHARACTER PROPERTIES
-        public string EntityAndID
+        public string ID_CH
         {
             set
             {
-                character.name = $"{value}_CH";
+                character.name = value;
+            }
+        }
+        public string EntityID
+        {
+            set
+            {
                 character.entityID = value;
             }
         }
@@ -223,14 +229,17 @@ namespace BrutalAPI
         }
         #endregion
 
-        public Character(string id, string name)
+        public Character(string displayName, string id_CH)
         {
             character = ScriptableObject.CreateInstance<CharacterSO>();
-            EntityAndID = id;
-            Name = name;
+            ID_CH = id_CH;
+            EntityID = id_CH;
+            Name = displayName;
             menuCharacter = null;
             ignoredSupport = null;
             ignoredDPS = null;
+            //Basic Slap
+            character.basicCharAbility = LoadedDBsHandler.AbilityDB.SlapAbility;
             //Initialize Lists here?
             character.m_BossAchData = new List<CharFinalBossAchData>();
             character.passiveAbilities = new List<BasePassiveAbilitySO>();
