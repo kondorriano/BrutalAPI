@@ -4,37 +4,56 @@ using System.Text;
 using UnityEngine;
 
 namespace BrutalAPI 
-{ 
-    public abstract class BaseItem
+{
+    public static class ItemUtils
     {
-        /*
-        -ID
-        -NAME
-        ITEMTYPES[]
-        -FLAVOUR
-        -DESCRIPTION
-        -SPRITE
-        
-        -CHARACTER MODIFIERS
-
-        -TRIGGER ON
-        -TRIGGER CONDITIONS[] (Effector conditions)
-        -POPS UP?
-        -DOES ACTION ON TRIGGER ATTACH <<<<<< SHOULD THIS BE INHERITABLE PROTECTED PROPERTY?
-
-
-        -CONSUME ON USE
-        -CONSUME CONDITIONS[]
-        -CONSUME ON TRIGGER
-
-        -SHOP PRICE
-        -IS SHOP
-        -STARTS LOCKED
-        -USES "The"
-        -USES SPECIAL UNLOCK TEXT
-        -SPECIAL UNLOCK TEXT ID
+        /*       
+        Unlock ID Set?
          */
 
+        #region Item Pools
+        public static void AddItemToShopStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
+        {
+            LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, true, false, "Shop", "Shop");
+        }
+        public static void AddItemToTreasureStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
+        {
+            LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, false, true, "Treasure", "Treasure");
+        }
+        public static void AddItemToCustomStatsCategoryAndGamePool(BaseWearableSO item, string categoryID, string categoryDisplayName,
+            ItemModdedUnlockInfo itemStats, bool addToShopGamePool = false, bool addToTreasureGamePool = false)
+        {
+            LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, addToShopGamePool, addToTreasureGamePool, categoryID, categoryDisplayName);
+        }
+        /// <summary>
+        /// Use enum ItemLootPool_GameIDs .ToString() option on lootListID for in game fishing pools
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="lootListID">Use enum ItemLootPool_GameIDs .ToString() option on lootListID for in game fishing pools</param>
+        /// <param name="rarity"></param>
+        /// <param name="addToLockedItem"></param>
+        public static void AddItemToLootPool(BaseWearableSO item, string lootListID, int rarity, bool addToLockedItem = false)
+        {
+            if (!LoadedDBsHandler.ItemPoolDB.TryGetItemLootListEffect(lootListID, out ExtraLootListEffect list))
+            {
+                Debug.LogError($"No Loot Pool with ID {lootListID}");
+                return;
+            }
+
+            LootItemProbability data = new LootItemProbability(item.name, rarity);
+            if (addToLockedItem)
+                list._lockedLootableItems.Add(data);
+            else
+                list._lootableItems.Add(data);
+        }
+        #endregion
+    }    
+}
+
+namespace BrutalAPI.Items
+{
+    public abstract class BaseItem
+    {
         #region ITEM PROPERTIES
         //Basic Info
         public abstract BaseWearableSO Item { get; }
@@ -192,41 +211,25 @@ namespace BrutalAPI
 
         #endregion
 
-        protected void InitializeItemData(BaseWearableSO item)
+        protected void InitializeItemData()
         {
-            item.conditions = new EffectorConditionSO[0];
-            item.consumeConditions = new EffectorConditionSO[0];
-            item.staticModifiers = new WearableStaticModifierSetterSO[0];
+            Item.conditions = new EffectorConditionSO[0];
+            Item.consumeConditions = new EffectorConditionSO[0];
+            Item.staticModifiers = new WearableStaticModifierSetterSO[0];
         }
 
-        /*
-         ID Set
-        Item Unlock Pool Set
-        Item Pool Set
-        Fish Pools Set
-        Loaded Asset Set
-        Unlock ID Set?
-         */
-        public void SetItemToPool(string id_ITEM) 
+    }
+    /// <summary>
+    ///BarelyUsedGauze_SW, BrigadeOfDis_TW, Bronzos2Cents_SW, DivineMud_TW, FlyPaper_SW, GentlemensGlove_SW, GlueTrap_SW, Ichthys_TW, IdeaOfEvil_TW, ImmolatedFairy_TW, LadyGloves_SW, ManMadeOvum_TW, Prosthetics_SW, RibOfEve_TW, SkinnedSkate_TW, SoggyBandages_SW, SomeoneElsesFace_SW, SpikedCollar_TW, SpringTrap_SW, StrangeFruit_TW, TheBrand_TW, TheHumanSoul_TW, TheMastersSickle_SW, TondalsVision_TW, UnfortunateProphecy_TW
+    /// </summary>
+    public class CustomModdedClass_Item : BaseItem
+    {
+        public BaseWearableSO item;
+        public override BaseWearableSO Item { get => item; }
+        public CustomModdedClass_Item(BaseWearableSO moddedItem)
         {
-            /*
-            ID Set
-            Item Unlock Pool Set
-            Item Pool Set
-            Fish Pools Set
-            Loaded Asset Set
-            Unlock ID Set?
-            */
-            LoadedDBsHandler.ItemUnlocksDB.AddNewItem()
-        }
-
-        [Flags]
-        public enum ItemPools
-        {
-            Treasure = 1,
-            Shop = 2,
-            Fish = 4,
-            Extra = 8
+            item = moddedItem;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -239,6 +242,7 @@ namespace BrutalAPI
         public Basic_Item()
         {
             item = ScriptableObject.CreateInstance<BasicWearable>();
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -273,6 +277,7 @@ namespace BrutalAPI
             item = ScriptableObject.CreateInstance<PerformEffectWearable>();
             item._immediateEffect = immediate;
             item.effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -361,7 +366,8 @@ namespace BrutalAPI
             item = ScriptableObject.CreateInstance<CustomDoublePerformEffectWearable>();
             item._firstImmediateEffect = immediate;
             item._firstEffects = effects;
-        }        
+            InitializeItemData();
+        }
     }
     /// <summary>
     ///HealthInsurance_SW, Hereafter_TW, TaintedApple_TW, TheApple_TW
@@ -386,6 +392,7 @@ namespace BrutalAPI
         {
             item = ScriptableObject.CreateInstance<PerformEffectWithFalseSetterWearable>();
             item.effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -460,6 +467,7 @@ namespace BrutalAPI
             item._dataSet = dataSet;
             item._immediateEffect = immediate;
             item._effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -494,6 +502,7 @@ namespace BrutalAPI
             item.triggerOn = TriggerCalls.CanApplyStatusEffect;
             item._immediateEffect = immediate;
             item._effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -568,6 +577,7 @@ namespace BrutalAPI
             item._customPerformTriggerOn = triggerOn;
             item._customIsImmediateEffect = immediate;
             item._customEffects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -627,6 +637,7 @@ namespace BrutalAPI
             item._useSimpleInt = useInt;
             item._immediateEffect = immediate;
             item._effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -716,6 +727,7 @@ namespace BrutalAPI
             item._useDealt = useDealt;
             item._useSimpleInt = useInt;
             item._doesIncrease = doesIncreaseDmg;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -785,6 +797,7 @@ namespace BrutalAPI
             item._immediateEffect = immediate;
             item._effects = effects;
             item.triggerOn = TriggerCalls.CanHeal;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -826,6 +839,7 @@ namespace BrutalAPI
             item._dataSet = dataSet;
             item._immediateEffect = immediate;
             item._effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -867,6 +881,7 @@ namespace BrutalAPI
             item._useIntReferenceResult = useIntRefResult;
             item._immediateEffect = immediate;
             item._effects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -904,6 +919,7 @@ namespace BrutalAPI
             item = ScriptableObject.CreateInstance<PerformEffectOnAttachWearable>();
             item.attachEffects = attachEffects;
             item.dettachEffects = dettachEffects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -927,6 +943,7 @@ namespace BrutalAPI
         {
             item = ScriptableObject.CreateInstance<BooleanSetterWearable>();
             item._dataSet = dataSet;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -965,6 +982,7 @@ namespace BrutalAPI
             item._toMultiply = multiplier;
             item._useDealt = useDealt;
             item._useSimpleInt = useInt;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1011,6 +1029,7 @@ namespace BrutalAPI
             item._secondToMultiply = secondMult;
             item._percentageToMultiply = percentage;
             item._useDealt = useDealt;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1041,6 +1060,7 @@ namespace BrutalAPI
             item = ScriptableObject.CreateInstance<AdditionDamageModifierSetterWearable>();
             item._useDealt = useDealt;
             item._toAdd = toAdd;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1071,6 +1091,7 @@ namespace BrutalAPI
             item = ScriptableObject.CreateInstance<MaximizationDamageModifierSetterWearable>();
             item._useDealt = useDealt;
             item._toMaximize = toMaximize;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1117,6 +1138,7 @@ namespace BrutalAPI
             item._useDealt = useDealt;
             item._useSimpleInt = useInt;
             item._doesIncrease = doesIncreaseDmg;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1142,6 +1164,7 @@ namespace BrutalAPI
         {
             item = ScriptableObject.CreateInstance<PercentageDamageModifierVariousOptionsTypeSetterWearable>();
             item._percData = percData;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1184,6 +1207,7 @@ namespace BrutalAPI
             item._defaultDoesIncrease = doesIncreaseDmg;
             item._defaultPercentageToModify = percentage;
             item._unitTypeData = (unitData == null) ? new UnitTypePercMod[0] : unitData;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1230,6 +1254,7 @@ namespace BrutalAPI
             item._doesIncreaseDirect = doesIncreaseDirectDmg;
             item._percentageToModifyIndirect = indirectPerc;
             item._doesIncreaseIndirect = doesIncreaseIndirectDmg;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1312,7 +1337,7 @@ namespace BrutalAPI
                 item._consumptionEffects = value;
             }
         }
-        
+
 
         public DamageReceivedPercentageModifierWithConsumeEffect_Item(int directPerc = 50, bool doesIncreaseDirectDmg = false, int indirectPerc = 50, bool doesIncreaseIndirectDmg = false)
         {
@@ -1321,6 +1346,7 @@ namespace BrutalAPI
             item._doesIncreaseDirect = doesIncreaseDirectDmg;
             item._percentageToModifyIndirect = indirectPerc;
             item._doesIncreaseIndirect = doesIncreaseIndirectDmg;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1333,6 +1359,7 @@ namespace BrutalAPI
         public DamageMaxHealthModifier_Item()
         {
             item = ScriptableObject.CreateInstance<MaxHealthDamageModifierSetterWearable>();
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1383,6 +1410,7 @@ namespace BrutalAPI
             item._useDealt = useDealt;
             item._useRandomFromList = false;
             item._possiblesToDecrease = new int[0];
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1418,6 +1446,7 @@ namespace BrutalAPI
             item = ScriptableObject.CreateInstance<CurrencyShieldDamageModifierSetterWearable>();
             item._useDealt = useDealt;
             item.m_AttachEffects = effects;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1431,6 +1460,7 @@ namespace BrutalAPI
         public StatusEffectsReductionBlock_Item()
         {
             item = ScriptableObject.CreateInstance<StatusEffectsReductionBlockWearable>();
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1445,6 +1475,7 @@ namespace BrutalAPI
         {
             item = ScriptableObject.CreateInstance<StatusEffectApplicationFalseSetterWearable>();
             item.triggerOn = TriggerCalls.CanApplyStatusEffect;
+            InitializeItemData();
         }
     }
     /// <summary>
@@ -1582,6 +1613,7 @@ namespace BrutalAPI
         public TheJersey_Item()
         {
             item = ScriptableObject.CreateInstance<JerseyEffectWearable>();
+            InitializeItemData();
         }
     }
 }
