@@ -14,10 +14,12 @@ namespace BrutalAPI
         #region Item Pools
         public static void AddItemToShopStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
         {
+            item.isShopItem = true;
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, true, false, "Shop", "Shop");
         }
         public static void AddItemToTreasureStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
         {
+            item.isShopItem = false;
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, false, true, "Treasure", "Treasure");
         }
         public static void AddItemToCustomStatsCategoryAndGamePool(BaseWearableSO item, string categoryID, string categoryDisplayName,
@@ -59,6 +61,10 @@ namespace BrutalAPI.Items
         public abstract BaseWearableSO Item { get; }
         public string Item_ID
         {
+            get
+            {
+                return Item.name;
+            }
             set
             {
                 Item.name = value;
@@ -211,8 +217,9 @@ namespace BrutalAPI.Items
 
         #endregion
 
-        protected void InitializeItemData()
+        protected void InitializeItemData(string id)
         {
+            Item_ID = id;
             Item.conditions = new EffectorConditionSO[0];
             Item.consumeConditions = new EffectorConditionSO[0];
             Item.staticModifiers = new WearableStaticModifierSetterSO[0];
@@ -226,10 +233,10 @@ namespace BrutalAPI.Items
     {
         public BaseWearableSO item;
         public override BaseWearableSO Item { get => item; }
-        public CustomModdedClass_Item(BaseWearableSO moddedItem)
+        public CustomModdedClass_Item(BaseWearableSO moddedItem, string itemID = "DefaultID_Item")
         {
             item = moddedItem;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -239,10 +246,10 @@ namespace BrutalAPI.Items
     {
         public BasicWearable item;
         public override BaseWearableSO Item { get => item; }
-        public Basic_Item()
+        public Basic_Item(string itemID = "DefaultID_Item")
         {
             item = ScriptableObject.CreateInstance<BasicWearable>();
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -263,7 +270,6 @@ namespace BrutalAPI.Items
                 item.effects = value;
             }
         }
-
         public bool IsEffectImmediate
         {
             set
@@ -272,12 +278,12 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffect_Item(bool immediate = false, EffectInfo[] effects = null)
+        public PerformEffect_Item(string itemID = "DefaultID_Item", EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<PerformEffectWearable>();
             item._immediateEffect = immediate;
             item.effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -361,12 +367,12 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DoublePerformEffect_Item(bool immediate = false, EffectInfo[] effects = null)
+        public DoublePerformEffect_Item(string itemID = "DefaultID_Item", EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<CustomDoublePerformEffectWearable>();
             item._firstImmediateEffect = immediate;
             item._firstEffects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -388,11 +394,11 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectWithFalseSetter_Item(EffectInfo[] effects = null)
+        public PerformEffectWithFalseSetter_Item(string itemID = "DefaultID_Item", EffectInfo[] effects = null)
         {
             item = ScriptableObject.CreateInstance<PerformEffectWithFalseSetterWearable>();
             item.effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -461,13 +467,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectWithBooleanSetter_Item(bool dataSet = false, bool immediate = false, EffectInfo[] effects = null)
+        public PerformEffectWithBooleanSetter_Item(string itemID = "DefaultID_Item", bool dataSet = false, EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<CustomBooleanTriggerSetterWithPerformEffectWearable>();
             item._dataSet = dataSet;
             item._immediateEffect = immediate;
             item._effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -496,13 +502,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectWithStatusEffectApplyBlock_Item(bool immediate = false, EffectInfo[] effects = null)
+        public PerformEffectWithStatusEffectApplyBlock_Item(string itemID = "DefaultID_Item", EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<PerformEffectWithStatusEffectApplicationFalseSetterWearable>();
             item.triggerOn = TriggerCalls.CanApplyStatusEffect;
             item._immediateEffect = immediate;
             item._effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -571,13 +577,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformWithConsumeEffect_Item(TriggerCalls triggerOn = TriggerCalls.Count, bool immediate = false, EffectInfo[] effects = null)
+        public PerformWithConsumeEffect_Item(string itemID = "DefaultID_Item", TriggerCalls triggerOn = TriggerCalls.Count, EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<PerformEffectWithConsumeEffectWearable>();
             item._customPerformTriggerOn = triggerOn;
             item._customIsImmediateEffect = immediate;
             item._customEffects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -627,9 +633,9 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectWithDamageMultiplierModifier_Item(
+        public PerformEffectWithDamageMultiplierModifier_Item(string itemID = "DefaultID_Item",
             int multiplier = 1, bool useDealt = false, bool useInt = false,
-            bool immediate = false, EffectInfo[] effects = null)
+            EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<PerformEffectWithMultiplierDamageModifierSetterWearable>();
             item._toMultiply = multiplier;
@@ -637,7 +643,7 @@ namespace BrutalAPI.Items
             item._useSimpleInt = useInt;
             item._immediateEffect = immediate;
             item._effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -720,14 +726,15 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectWithDamagePercentageModifier_Item(int percentage = 1, bool useDealt = false, bool useInt = false, bool doesIncreaseDmg = false)
+        public PerformEffectWithDamagePercentageModifier_Item(string itemID = "DefaultID_Item", 
+            int percentage = 1, bool useDealt = false, bool useInt = false, bool doesIncreaseDmg = false)
         {
             item = ScriptableObject.CreateInstance<CustomPercDmgModAndPerformEffectWearable>();
             item._percentageToModify = percentage;
             item._useDealt = useDealt;
             item._useSimpleInt = useInt;
             item._doesIncrease = doesIncreaseDmg;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -791,13 +798,13 @@ namespace BrutalAPI.Items
 
 
 
-        public PerformEffectWithCanHealSetter_Item(bool immediate = false, EffectInfo[] effects = null)
+        public PerformEffectWithCanHealSetter_Item(string itemID = "DefaultID_Item", EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<CustomCanHealSetterWithPerformEffectWearable>();
             item._immediateEffect = immediate;
             item._effects = effects;
             item.triggerOn = TriggerCalls.CanHeal;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -833,13 +840,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectAndCanHealSetter_Item(bool dataSet = false, bool immediate = false, EffectInfo[] effects = null)
+        public PerformEffectAndCanHealSetter_Item(string itemID = "DefaultID_Item", bool dataSet = false, EffectInfo[] effects = null, bool immediate = false)
         {
             item = ScriptableObject.CreateInstance<CustomCanHealSetterAndPerformEffectWearable>();
             item._dataSet = dataSet;
             item._immediateEffect = immediate;
             item._effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -875,13 +882,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectAddingResult_Item(bool immediate = false, EffectInfo[] effects = null, bool useIntRefResult = false)
+        public PerformEffectAddingResult_Item(string itemID = "DefaultID_Item", EffectInfo[] effects = null, bool immediate = false, bool useIntRefResult = false)
         {
             item = ScriptableObject.CreateInstance<PerformEffectAddingResultWearable>();
             item._useIntReferenceResult = useIntRefResult;
             item._immediateEffect = immediate;
             item._effects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -914,12 +921,12 @@ namespace BrutalAPI.Items
             }
         }
 
-        public PerformEffectOnAttach_Item(EffectInfo[] attachEffects = null, EffectInfo[] dettachEffects = null)
+        public PerformEffectOnAttach_Item(string itemID = "DefaultID_Item", EffectInfo[] attachEffects = null, EffectInfo[] dettachEffects = null)
         {
             item = ScriptableObject.CreateInstance<PerformEffectOnAttachWearable>();
             item.attachEffects = attachEffects;
             item.dettachEffects = dettachEffects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -939,11 +946,11 @@ namespace BrutalAPI.Items
         }
 
 
-        public BooleanSetter_Item(bool dataSet = false)
+        public BooleanSetter_Item(string itemID = "DefaultID_Item", bool dataSet = false)
         {
             item = ScriptableObject.CreateInstance<BooleanSetterWearable>();
             item._dataSet = dataSet;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -976,13 +983,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageMultiplierModifier_Item(int multiplier = 1, bool useDealt = false, bool useInt = false)
+        public DamageMultiplierModifier_Item(string itemID = "DefaultID_Item", int multiplier = 1, bool useDealt = false, bool useInt = false)
         {
             item = ScriptableObject.CreateInstance<MultiplierDamageModifierSetterWearable>();
             item._toMultiply = multiplier;
             item._useDealt = useDealt;
             item._useSimpleInt = useInt;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1022,14 +1029,14 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageMultiplierByPercentageModifier_Item(int firstMult = 1, int secondMult = 1, int percentage = 1, bool useDealt = false)
+        public DamageMultiplierByPercentageModifier_Item(string itemID = "DefaultID_Item", int firstMult = 1, int secondMult = 1, int percentage = 1, bool useDealt = false)
         {
             item = ScriptableObject.CreateInstance<PercentageMultiplierDamageModifierSetterWearable>();
             item._firstToMultiply = firstMult;
             item._secondToMultiply = secondMult;
             item._percentageToMultiply = percentage;
             item._useDealt = useDealt;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1055,12 +1062,12 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageAdditionModifier_Item(int toAdd = 1, bool useDealt = false)
+        public DamageAdditionModifier_Item(string itemID = "DefaultID_Item", int toAdd = 1, bool useDealt = false)
         {
             item = ScriptableObject.CreateInstance<AdditionDamageModifierSetterWearable>();
             item._useDealt = useDealt;
             item._toAdd = toAdd;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1086,12 +1093,12 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageMaximizationModifier_Item(int toMaximize = 1, bool useDealt = false)
+        public DamageMaximizationModifier_Item(string itemID = "DefaultID_Item", int toMaximize = 1, bool useDealt = false)
         {
             item = ScriptableObject.CreateInstance<MaximizationDamageModifierSetterWearable>();
             item._useDealt = useDealt;
             item._toMaximize = toMaximize;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1131,14 +1138,14 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamagePercentageModifier_Item(int percentage = 1, bool useDealt = false, bool useInt = false, bool doesIncreaseDmg = false)
+        public DamagePercentageModifier_Item(string itemID = "DefaultID_Item", int percentage = 1, bool useDealt = false, bool useInt = false, bool doesIncreaseDmg = false)
         {
             item = ScriptableObject.CreateInstance<PercentageDamageModifierSetterWearable>();
             item._percentageToModify = percentage;
             item._useDealt = useDealt;
             item._useSimpleInt = useInt;
             item._doesIncrease = doesIncreaseDmg;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1160,11 +1167,11 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageDealtMultiPercentageModifier_Item(PercOption[] percData = null)
+        public DamageDealtMultiPercentageModifier_Item(string itemID = "DefaultID_Item", PercOption[] percData = null)
         {
             item = ScriptableObject.CreateInstance<PercentageDamageModifierVariousOptionsTypeSetterWearable>();
             item._percData = percData;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1201,13 +1208,13 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageDealtPercentageModifierByUnitType_Item(int percentage = 50, bool doesIncreaseDmg = true, UnitTypePercMod[] unitData = null)
+        public DamageDealtPercentageModifierByUnitType_Item(string itemID = "DefaultID_Item", int percentage = 50, bool doesIncreaseDmg = true, UnitTypePercMod[] unitData = null)
         {
             item = ScriptableObject.CreateInstance<PercentageDamageModifierByUnitTypeSetterWearable>();
             item._defaultDoesIncrease = doesIncreaseDmg;
             item._defaultPercentageToModify = percentage;
             item._unitTypeData = (unitData == null) ? new UnitTypePercMod[0] : unitData;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1247,14 +1254,14 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageReceivedPercentageModifier_Item(int directPerc = 50, bool doesIncreaseDirectDmg = false, int indirectPerc = 50, bool doesIncreaseIndirectDmg = false)
+        public DamageReceivedPercentageModifier_Item(string itemID = "DefaultID_Item", int directPerc = 50, bool doesIncreaseDirectDmg = false, int indirectPerc = 50, bool doesIncreaseIndirectDmg = false)
         {
             item = ScriptableObject.CreateInstance<PercDmgModifierSetterByReceivedDamageTypeWearable>();
             item._percentageToModifyDirect = directPerc;
             item._doesIncreaseDirect = doesIncreaseDirectDmg;
             item._percentageToModifyIndirect = indirectPerc;
             item._doesIncreaseIndirect = doesIncreaseIndirectDmg;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1339,14 +1346,14 @@ namespace BrutalAPI.Items
         }
 
 
-        public DamageReceivedPercentageModifierWithConsumeEffect_Item(int directPerc = 50, bool doesIncreaseDirectDmg = false, int indirectPerc = 50, bool doesIncreaseIndirectDmg = false)
+        public DamageReceivedPercentageModifierWithConsumeEffect_Item(string itemID = "DefaultID_Item", int directPerc = 50, bool doesIncreaseDirectDmg = false, int indirectPerc = 50, bool doesIncreaseIndirectDmg = false)
         {
             item = ScriptableObject.CreateInstance<PercDmgModByReceivedWithConsEffWearable>();
             item._percentageToModifyDirect = directPerc;
             item._doesIncreaseDirect = doesIncreaseDirectDmg;
             item._percentageToModifyIndirect = indirectPerc;
             item._doesIncreaseIndirect = doesIncreaseIndirectDmg;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1356,10 +1363,10 @@ namespace BrutalAPI.Items
     {
         public MaxHealthDamageModifierSetterWearable item;
         public override BaseWearableSO Item { get => item; }
-        public DamageMaxHealthModifier_Item()
+        public DamageMaxHealthModifier_Item(string itemID = "DefaultID_Item")
         {
             item = ScriptableObject.CreateInstance<MaxHealthDamageModifierSetterWearable>();
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1403,14 +1410,14 @@ namespace BrutalAPI.Items
             }
         }
 
-        public DamageSubstractionModifier_Item(int toDecrease = 1, bool useDealt = false)
+        public DamageSubstractionModifier_Item(string itemID = "DefaultID_Item", int toDecrease = 1, bool useDealt = false)
         {
             item = ScriptableObject.CreateInstance<SubstractionDamageModifierSetterWearable>();
             item._toDecrease = toDecrease;
             item._useDealt = useDealt;
             item._useRandomFromList = false;
             item._possiblesToDecrease = new int[0];
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1441,12 +1448,12 @@ namespace BrutalAPI.Items
         }
 
 
-        public MoneyShieldModifier_Item(bool useDealt = false, EffectInfo[] effects = null)
+        public MoneyShieldModifier_Item(string itemID = "DefaultID_Item", bool useDealt = false, EffectInfo[] effects = null)
         {
             item = ScriptableObject.CreateInstance<CurrencyShieldDamageModifierSetterWearable>();
             item._useDealt = useDealt;
             item.m_AttachEffects = effects;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1457,10 +1464,10 @@ namespace BrutalAPI.Items
         public StatusEffectsReductionBlockWearable item;
         public override BaseWearableSO Item { get => item; }
 
-        public StatusEffectsReductionBlock_Item()
+        public StatusEffectsReductionBlock_Item(string itemID = "DefaultID_Item")
         {
             item = ScriptableObject.CreateInstance<StatusEffectsReductionBlockWearable>();
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1471,11 +1478,11 @@ namespace BrutalAPI.Items
         public StatusEffectApplicationFalseSetterWearable item;
         public override BaseWearableSO Item { get => item; }
 
-        public StatusEffectApplyBlock_Item()
+        public StatusEffectApplyBlock_Item(string itemID = "DefaultID_Item")
         {
             item = ScriptableObject.CreateInstance<StatusEffectApplicationFalseSetterWearable>();
             item.triggerOn = TriggerCalls.CanApplyStatusEffect;
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
     /// <summary>
@@ -1610,10 +1617,10 @@ namespace BrutalAPI.Items
             }
         }
 
-        public TheJersey_Item()
+        public TheJersey_Item(string itemID = "DefaultID_Item")
         {
             item = ScriptableObject.CreateInstance<JerseyEffectWearable>();
-            InitializeItemData();
+            InitializeItemData(itemID);
         }
     }
 }
