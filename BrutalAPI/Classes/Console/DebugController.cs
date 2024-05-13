@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -9,16 +10,10 @@ namespace BrutalAPI
 {
     public class DebugController : MonoBehaviour
     {
-        /*
         const BindingFlags AllFlags = (BindingFlags)(-1);
         public static DebugController _instance;
 
-        bool showConsole = false;
-        string input;
         string output;
-
-        List<string> history = new List<string>();
-        int historyID;
 
         List<DebugCommand> commandList;
         public static DebugCommand HELP;
@@ -46,15 +41,16 @@ namespace BrutalAPI
             }
         }
 
-
         public void Awake()
         {
             _instance = this;
             DontDestroyOnLoad(gameObject);
-
+            
             IDetour OpenConsoleHook = new Hook(
                     typeof(Keyboard).GetMethod("OnTextInput", AllFlags),
                     typeof(DebugController).GetMethod("KeyPressed", AllFlags));
+
+            GameInformationHolder info = LoadedDBsHandler.InfoHolder;
 
             //Help command
             HELP = new DebugCommand("help", "Shows available commands and information about them.", "help (command)", (string[] parameters) =>
@@ -99,7 +95,7 @@ namespace BrutalAPI
                 if (!LoadedAssetsHandler.LoadedWearables.ContainsKey(parameters[0]))
                 { WriteLine("Unknown Item"); return; }
 
-                BrutalAPI.mainMenuController._informationHolder.Run.playerData.AddNewItem(LoadedAssetsHandler.GetWearable(parameters[0]));
+                info.Run.playerData.AddNewItem(LoadedAssetsHandler.GetWearable(parameters[0]));
                 { WriteLine("Added item " + parameters[0] + " to your inventory"); return; }
             });
 
@@ -128,7 +124,7 @@ namespace BrutalAPI
                 if (rank > 3)
                 { WriteLine("A party member can't have a rank above 3"); return; }
 
-                BrutalAPI.mainMenuController._informationHolder.Run.playerData.AddNewCharacter(LoadedAssetsHandler.GetCharcater(parameters[0]), rank, ability1, ability2);
+                info.Run.playerData.AddNewCharacter(LoadedAssetsHandler.GetCharacter(parameters[0]), rank, ability1, ability2);
                 { WriteLine("Added fool " + parameters[0] + " to your party"); return; }
             });
 
@@ -151,7 +147,7 @@ namespace BrutalAPI
                 if (!CombatManager.Instance._combatInitialized)
                 { WriteLine("Can't spawn an enemy when out of combat"); return; }
 
-                CombatManager.Instance.AddPriorityRootAction(new SpawnEnemyAction(LoadedAssetsHandler.GetEnemy(enemyid), slot, true, true, SpawnType.Basic));
+                CombatManager.Instance.AddPriorityRootAction(new SpawnEnemyAction(LoadedAssetsHandler.GetEnemy(enemyid), slot, true, true, CombatTypeID.Spawn_Basic.ToString()));
                 { WriteLine("Spawned enemy " + parameters[0] + " in slot " + slot.ToString()); return; }
             });
 
@@ -181,9 +177,10 @@ namespace BrutalAPI
                 target.slotPointerDirections = new int[1] { slot };
                 target.getAllies = targetAllies;
 
-                Effect killdmg = new Effect(ScriptableObject.CreateInstance<DamageEffect>(), damage, IntentType.Damage_Death, target);
+                EffectInfo killdmg = Effects.GenerateEffect(ScriptableObject.CreateInstance<DamageEffect>(),
+                    damage, target);
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(ExtensionMethods.ToEffectInfoArray(new Effect[1] { killdmg }),
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { killdmg },
                     CombatManager.Instance._stats.CharactersOnField.First().Value));
 
                 { WriteLine("Damaged entity in slot " + slot.ToString() + " for " + damage.ToString() + " damage"); return; }
@@ -215,9 +212,9 @@ namespace BrutalAPI
                 target.slotPointerDirections = new int[1] { slot };
                 target.getAllies = targetAllies;
 
-                Effect heal = new Effect(ScriptableObject.CreateInstance<HealEffect>(), amount, IntentType.Heal_11_20, target);
+                EffectInfo heal = Effects.GenerateEffect(ScriptableObject.CreateInstance<HealEffect>(), amount, target);
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(ExtensionMethods.ToEffectInfoArray(new Effect[1] { heal }),
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { heal },
                     CombatManager.Instance._stats.CharactersOnField.First().Value));
 
                 { WriteLine("Healed entity in slot " + slot.ToString() + " for " + amount.ToString() + " HP"); return; }
@@ -234,8 +231,8 @@ namespace BrutalAPI
                 if (!int.TryParse(parameters[0], out slot))
                 { WriteLine("Slot is not a number"); return; }
 
-                BrutalAPI.mainMenuController._informationHolder.Run.playerData.RankUpCharacter(slot, 0);
-                IMinimalCharacterInfo character = BrutalAPI.mainMenuController._informationHolder.Run.playerData.GetCharacterFromPartySlot(slot);
+                info.Run.playerData.RankUpCharacter(slot, 0);
+                IMinimalCharacterInfo character = info.Run.playerData.GetCharacterFromPartySlot(slot);
 
                 { WriteLine("Leveled up " + character.Character._characterName); return; }
             });
@@ -251,7 +248,7 @@ namespace BrutalAPI
                 if (!int.TryParse(parameters[0], out amount))
                 { WriteLine("Money is not a number"); return; }
 
-                BrutalAPI.mainMenuController._informationHolder.Run.playerData.AddCurrency(amount);
+                info.Run.playerData.AddCurrency(amount);
 
                 { WriteLine("Added " + amount.ToString() + " coins"); return; }
             });
@@ -271,9 +268,9 @@ namespace BrutalAPI
                 if (!bool.TryParse(parameters[1], out reroll))
                 { WriteLine("Restart Area is not true or false"); return; }
 
-                BrutalAPI.ChangeArea((Areas)ID, reroll);
+                ChangeArea(ID, reroll);
 
-                { WriteLine("Teleported to " + BrutalAPI.mainMenuController._informationHolder.Run.CurrentZoneDB.ZoneName); return; }
+                { WriteLine("Teleported to " + info.Run.CurrentZoneDB.ZoneName); return; }
             });
 
             //ENDCOMBAT
@@ -285,9 +282,10 @@ namespace BrutalAPI
                 var firstChar = CombatManager.Instance._stats.CharactersOnField.First().Value;
                 CombatEndEffect combatEndEffect = ScriptableObject.CreateInstance<CombatEndEffect>();
                 combatEndEffect._ignoreLoot = false;
-                Effect effect = new Effect(combatEndEffect, 0, null, Slots.Front);
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(ExtensionMethods.ToEffectInfoArray(new Effect[] { effect }), firstChar));
+                EffectInfo effect = Effects.GenerateEffect(combatEndEffect);
+
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { effect }, firstChar));
                 WriteLine("Ended combat"); return;
             });
 
@@ -300,28 +298,24 @@ namespace BrutalAPI
                 if (parameters == null || parameters.Length == 0)
                 { WriteLine("Syntax error: " + PIGMENT.commandFormat); return; }
 
-                Effect[] manaEffects = new Effect[parameters.Length];
+                EffectInfo[] manaEffects = new EffectInfo[parameters.Length];
+                
                 var firstChar = CombatManager.Instance._stats.CharactersOnField.First().Value;
 
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     GenerateColorManaEffect colorManaEffect = ScriptableObject.CreateInstance<GenerateColorManaEffect>();
 
-                    int ID;
-                    if (!int.TryParse(parameters[i], out ID))
-                    { WriteLine("ID is not a number"); return; }
-
-                    ManaColorSO manaColor;
-                    if (!Pigments.PigmentDatabase.TryGetValue((PigmentType)ID, out manaColor))
+                    ManaColorSO manaColor = LoadedDBsHandler.PigmentDB.GetPigment(parameters[i]);
+                    if (manaColor == null || manaColor.Equals(null))
                     { WriteLine("ID is not a valid pigment ID"); return; }
 
                     colorManaEffect.mana = manaColor;
-                    Effect effect = new Effect(colorManaEffect, 1, null, Slots.Self);
-                    manaEffects[i] = effect;
-
+                    
+                    manaEffects[i] = Effects.GenerateEffect(colorManaEffect, 1);
                 }
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(ExtensionMethods.ToEffectInfoArray(manaEffects), firstChar));
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction(manaEffects, firstChar));
 
                 WriteLine("Generated " + parameters.Length + " pigment"); return;
             });
@@ -345,72 +339,34 @@ namespace BrutalAPI
             Debug.Log("Debug Console Ready");
         }
 
-        public void Update()
-        {
-            if (Keyboard.current.enterKey.wasPressedThisFrame)
-                HandleInput();
-
-            if (Keyboard.current.upArrowKey.wasPressedThisFrame && history.Count > 0)
-            {
-                input = history[historyID];
-                historyID -= 1;
-                historyID = Mathf.Clamp(historyID, 0, history.Count - 1);
-            }
-
-            if (Keyboard.current.downArrowKey.wasPressedThisFrame && history.Count > 0)
-            {
-                input = history[historyID];
-                historyID += 1;
-                historyID = Mathf.Clamp(historyID, 0, history.Count - 1);
-            }
-        }
-
-        public static void KeyPressed(Action<Keyboard, char> orig, Keyboard self, char c)
-        {
-            orig(self, c);
-
-            if (c == BrutalAPI.openDebugConsoleKey)
-                DebugController.Instance.showConsole = !DebugController.Instance.showConsole;
-        }
-
-        public void OnGUI()
-        {
-            if (!showConsole) return;
-
-            GUI.Box(new Rect(0, 0, Screen.width, 110), "");
-            GUI.Box(new Rect(0, 110, Screen.width, 30), "");
-
-            input = GUI.TextField(new Rect(10f, 115f, Screen.width - 20f, 20f), input);
-            GUI.TextArea(new Rect(10f, 5f, Screen.width - 20f, 105f), output);
-        }
-
-        public void HandleInput()
-        {
-            history.Add(input);
-            historyID = history.Count - 1;
-
-            string[] commandstr = input.Split(' ');
-            string[] parameters = commandstr.Skip(1).ToArray();
-
-            for (int i = 0; i < commandList.Count; i++)
-            {
-                if (commandstr[0] == commandList[i].commandId)
-                {
-                    commandList[i].Invoke(parameters);
-                    goto ExecutedCommand;
-                }
-            }
-            WriteLine("Unknown command");
-
-        ExecutedCommand:
-            input = "";
-        }
-
         public void WriteLine(string s)
         {
             output += "\n" + s;
         }
-        */
+
+        public void ChangeArea(int areaID, bool rerollArea = false)
+        {
+            if (overworldManager._zoneBeingLoaded)
+            {
+                return;
+            }
+            overworldManager._zoneBeingLoaded = true;
+            overworldManager._soundManager.ReleaseOverworldMusic();
+            RunDataSO run = overworldManager._informationHolder.Run;
+            ZoneDataBaseSO currentZoneDB = run.CurrentZoneDB;
+            run._currentZoneID = areaID;
+            if (rerollArea)
+                run.ResetZoneData();
+            string nextSceneName = overworldManager._mainMenuSceneName;
+            if (run.DoesCurrentZoneExist)
+            {
+                overworldManager._informationHolder.Run.zoneLoadingType = ZoneLoadingType.ZoneStart;
+                overworldManager._soundManager.TryStopAmbience();
+                nextSceneName = SceneManager.GetActiveScene().name;
+                overworldManager._soundManager.PlayOneshotSound(overworldManager._soundManager.changeZone);
+            }
+            overworldManager.StartCoroutine(overworldManager.LoadNextZone(nextSceneName));
+        }
     }
 
 }

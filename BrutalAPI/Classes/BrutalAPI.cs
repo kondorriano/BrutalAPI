@@ -8,7 +8,8 @@ namespace BrutalAPI
     {
         public void Awake()
         {
-
+            //LoadedDBsHandler.UnlockablesDB.TryGetFinalBossUnlockCheck(BossTypeIDs.OsmanSinnoks.ToString(), out FinalBossCharUnlockCheck check);
+            //check.entityIDUnlocks.a
         }
     }
 }
