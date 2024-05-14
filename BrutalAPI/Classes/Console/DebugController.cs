@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace BrutalAPI
 {
@@ -13,7 +13,12 @@ namespace BrutalAPI
         const BindingFlags AllFlags = (BindingFlags)(-1);
         public static DebugController _instance;
 
+        bool showConsole = false;
+        string input;
         string output;
+
+        int historyID;
+        List<string> history = new List<string>();
 
         List<DebugCommand> commandList;
         public static DebugCommand HELP;
@@ -260,15 +265,16 @@ namespace BrutalAPI
                 { WriteLine("Syntax error: " + TP.commandFormat); return; }
 
                 int ID;
-                bool reroll;
+                bool reset;
 
                 if (!int.TryParse(parameters[0], out ID))
                 { WriteLine("Area ID is not a number"); return; }
 
-                if (!bool.TryParse(parameters[1], out reroll))
+                if (!bool.TryParse(parameters[1], out reset))
                 { WriteLine("Restart Area is not true or false"); return; }
 
-                ChangeArea(ID, reroll);
+                ZoneChangeNtf data = new ZoneChangeNtf(ID, reset);
+                Tools.NtfUtils.notifications.PostNotification(Tools.Utils.changeSpecificZoneNtf, this, data);
 
                 { WriteLine("Teleported to " + info.Run.CurrentZoneDB.ZoneName); return; }
             });
@@ -339,33 +345,69 @@ namespace BrutalAPI
             Debug.Log("Debug Console Ready");
         }
 
+        public void Update()
+        {
+            if (Keyboard.current.enterKey.wasPressedThisFrame)
+                HandleInput();
+
+            if (Keyboard.current.upArrowKey.wasPressedThisFrame && history.Count > 0)
+            {
+                input = history[historyID];
+                historyID -= 1;
+                historyID = Mathf.Clamp(historyID, 0, history.Count - 1);
+            }
+
+            if (Keyboard.current.downArrowKey.wasPressedThisFrame && history.Count > 0)
+            {
+                input = history[historyID];
+                historyID += 1;
+                historyID = Mathf.Clamp(historyID, 0, history.Count - 1);
+            }
+        }
+        public static void KeyPressed(Action<Keyboard, char> orig, Keyboard self, char c)
+        {
+            orig(self, c);
+
+            if (c == BrutalAPI.openDebugConsoleKey)
+                DebugController.Instance.showConsole = !DebugController.Instance.showConsole;
+        }
+
+        public void OnGUI()
+        {
+            if (!showConsole) return;
+
+            GUI.Box(new Rect(0, 0, Screen.width, 110), "");
+            GUI.Box(new Rect(0, 110, Screen.width, 30), "");
+
+            input = GUI.TextField(new Rect(10f, 115f, Screen.width - 20f, 20f), input);
+            GUI.TextArea(new Rect(10f, 5f, Screen.width - 20f, 105f), output);
+        }
+
+        public void HandleInput()
+        {
+            history.Add(input);
+            historyID = history.Count - 1;
+
+            string[] commandstr = input.Split(' ');
+            string[] parameters = commandstr.Skip(1).ToArray();
+
+            for (int i = 0; i < commandList.Count; i++)
+            {
+                if (commandstr[0] == commandList[i].commandId)
+                {
+                    commandList[i].Invoke(parameters);
+                    goto ExecutedCommand;
+                }
+            }
+            WriteLine("Unknown command");
+
+        ExecutedCommand:
+            input = "";
+        }
+
         public void WriteLine(string s)
         {
             output += "\n" + s;
-        }
-
-        public void ChangeArea(int areaID, bool rerollArea = false)
-        {
-            if (overworldManager._zoneBeingLoaded)
-            {
-                return;
-            }
-            overworldManager._zoneBeingLoaded = true;
-            overworldManager._soundManager.ReleaseOverworldMusic();
-            RunDataSO run = overworldManager._informationHolder.Run;
-            ZoneDataBaseSO currentZoneDB = run.CurrentZoneDB;
-            run._currentZoneID = areaID;
-            if (rerollArea)
-                run.ResetZoneData();
-            string nextSceneName = overworldManager._mainMenuSceneName;
-            if (run.DoesCurrentZoneExist)
-            {
-                overworldManager._informationHolder.Run.zoneLoadingType = ZoneLoadingType.ZoneStart;
-                overworldManager._soundManager.TryStopAmbience();
-                nextSceneName = SceneManager.GetActiveScene().name;
-                overworldManager._soundManager.PlayOneshotSound(overworldManager._soundManager.changeZone);
-            }
-            overworldManager.StartCoroutine(overworldManager.LoadNextZone(nextSceneName));
         }
     }
 

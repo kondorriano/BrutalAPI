@@ -13,11 +13,17 @@
     <Reference Include="BepInEx">
       <HintPath>..\..\References\Bepinex\BepInEx.dll</HintPath>
     </Reference>
+    <Reference Include="Marosi.SerializableCollections">
+      <HintPath>..\..\References\Unity\Marosi.SerializableCollections.dll</HintPath>
+    </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
       <HintPath>..\..\References\Bepinex\MonoMod.RuntimeDetour.dll</HintPath>
     </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\References\Bepinex\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>..\..\References\Unity\Unity.InputSystem.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\References\Unity\UnityEngine.dll</HintPath>
@@ -30,6 +36,9 @@
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
       <HintPath>..\..\References\Unity\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\References\Unity\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 
