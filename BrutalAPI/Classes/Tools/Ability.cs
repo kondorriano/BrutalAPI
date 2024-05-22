@@ -126,16 +126,22 @@ namespace BrutalAPI
             ability.intents = new List<IntentTargetInfo>();
         }
 
-        public CharacterAbility GenerateCharacterAbility()
+        public CharacterAbility GenerateCharacterAbility(bool addToDB = false)
         {
+            if (addToDB)
+                LoadedDBsHandler.AbilityDB.AddNewCharacterAbility(ability.name, ability);
+
             CharacterAbility ab = new CharacterAbility();
             ab.ability = ability;
             ab.cost = Cost;
             return ab;
         }
 
-        public EnemyAbilityInfo GenerateEnemyAbility()
+        public EnemyAbilityInfo GenerateEnemyAbility(bool addToDB = false)
         {
+            if (addToDB)
+                LoadedDBsHandler.AbilityDB.AddNewEnemyAbility(ability.name, ability);
+            
             EnemyAbilityInfo ab = new EnemyAbilityInfo();
             ab.ability = ability;
             ab.rarity = Rarity;

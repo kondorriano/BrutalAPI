@@ -28,17 +28,17 @@ namespace BrutalAPI
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, addToShopGamePool, addToTreasureGamePool, categoryID, categoryDisplayName);
         }
         /// <summary>
-        /// Use enum ItemLootPool_GameIDs .ToString() option on lootListID for in game fishing pools
+        /// Use enum PoolList_GameIDs .ToString() option on lootListID for in game fishing pools
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="lootListID">Use enum ItemLootPool_GameIDs .ToString() option on lootListID for in game fishing pools</param>
+        /// <param name="lootListID">Use enum PoolList_GameIDs .ToString() option on lootListID for in game fishing pools</param>
         /// <param name="rarity"></param>
         /// <param name="addToLockedItem"></param>
         public static void AddItemToLootPool(BaseWearableSO item, string lootListID, int rarity, bool addToLockedItem = false)
         {
             if (!LoadedDBsHandler.ItemPoolDB.TryGetItemLootListEffect(lootListID, out ExtraLootListEffect list))
             {
-                Debug.LogError($"No Loot Pool with ID {lootListID}");
+                Debug.LogError($"No Pool with ID {lootListID}");
                 return;
             }
 
@@ -48,8 +48,17 @@ namespace BrutalAPI
             else
                 list._lootableItems.Add(data);
         }
+        public static void AddItemFishingRodPool(BaseWearableSO item, int rarity, bool addToLockedItem = false)
+        {
+            AddItemToLootPool(item, PoolList_GameIDs.FishingRod.ToString(), rarity, addToLockedItem);
+        }
+        public static void AddItemCanOfWormsPool(BaseWearableSO item, int rarity, bool addToLockedItem = false)
+        {
+            AddItemToLootPool(item, PoolList_GameIDs.CanOfWorms_WelsCatfish.ToString(), rarity, addToLockedItem);
+        }
+
         #endregion
-    }    
+    }
 }
 
 namespace BrutalAPI.Items

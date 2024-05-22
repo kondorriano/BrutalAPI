@@ -102,7 +102,7 @@ namespace BrutalAPI
         {
             set
             {
-                character.basicCharAbility = value.GenerateCharacterAbility();
+                character.basicCharAbility = value.GenerateCharacterAbility(true);
             }
         }
 
@@ -258,7 +258,7 @@ namespace BrutalAPI
         {
             CharacterAbility[] charaAbs = new CharacterAbility[abilities.Length];
             for (int i = 0; i < charaAbs.Length; i++)
-                charaAbs[i] = abilities[i].GenerateCharacterAbility(); 
+                charaAbs[i] = abilities[i].GenerateCharacterAbility(true); 
             
             character.rankedData.Add(new CharacterRankedData(health, charaAbs));
         }

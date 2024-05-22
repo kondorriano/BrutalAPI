@@ -76,5 +76,17 @@ namespace BrutalAPI
                 return ba;
             }
         }
+
+        public static AssetBundle LoadAssetBundle(string bundlePath)
+        {
+            //AssetBundle bundle = AssetBundle.LoadFromMemory(ResourceLoader.ResourceBinary(bundlePath));
+            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+            if (bundle == null)
+            {
+                Debug.LogWarning($"Failed to load AssetBundle: {bundle}!");
+                return null;
+            }
+            return bundle;
+        }
     }
 }
