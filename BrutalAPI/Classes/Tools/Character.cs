@@ -275,7 +275,7 @@ namespace BrutalAPI
             character.passiveAbilities.AddRange(passives);
         }
 
-        public void AddCharacter(bool unlockCharacter = false, bool omitOnFoolsBoard = false)
+        public void AddCharacterToDataBases(bool unlockCharacter = false, bool omitOnFoolsBoard = false)
         {
             LoadedDBsHandler.CharacterDB.AddNewCharacter(character.name, character, menuCharacter, ignoredSupport, ignoredDPS);
             if (unlockCharacter)

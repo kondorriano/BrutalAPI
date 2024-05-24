@@ -39,15 +39,41 @@ namespace BrutalAPI
     LOOT
     public EnemyLoot enemyLoot;
          */
-    class EnemyUtils
+    public class EnemyUtils
     {
-        /// <summary>
-        /// Use enum PoolList_GameIDs .ToString() option on poolListID for spawn pools
-        /// </summary>
-        /// <param name="enemy"></param>
-        /// <param name="poolListID">Use enum PoolList_GameIDs .ToString() option on poolListID for spawn pools</param>
+        public static void AddEnemyToSpawnPool(EnemySO enemy, PoolList_GameIDs poolListID)
+        {
+            if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(poolListID.ToString(), out SpawnRandomEnemyAnywhereEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
 
-        public static void AddEnemyToSpawnPool(EnemySO enemy, string poolListID)
+            effect._enemies.Add(enemy);
+        }
+        public static void AddEnemyToHealthSpawnPool(EnemySO enemy, PoolList_GameIDs poolListID)
+        {
+            if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(poolListID.ToString(), out SpawnMassivelyEverywhereUsingHealthEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
+
+            effect._possibleEnemies.Add(enemy);
+        }
+        public static void AddEnemyToTransformationPool(EnemySO enemy, PoolList_GameIDs poolListID)
+        {
+            if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(poolListID.ToString(), out CasterRandomTransformationEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
+
+            effect._possibleTransformations.Add(new TransformOption(enemy));
+        }
+
+
+        public static void AddEnemyToCustomSpawnPool(EnemySO enemy, string poolListID)
         {
             if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(poolListID, out SpawnRandomEnemyAnywhereEffect effect))
             {
@@ -57,13 +83,7 @@ namespace BrutalAPI
 
             effect._enemies.Add(enemy);
         }
-        /// <summary>
-        /// Use enum PoolList_GameIDs .ToString() option on poolListID for Massive Health spawn pools
-        /// </summary>
-        /// <param name="enemy"></param>
-        /// <param name="poolListID">Use enum PoolList_GameIDs .ToString() option on poolListID for Massive Health spawn pools</param>
-
-        public static void AddEnemyToHealthSpawnPool(EnemySO enemy, string poolListID)
+        public static void AddEnemyToCustomHealthSpawnPool(EnemySO enemy, string poolListID)
         {
             if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(poolListID, out SpawnMassivelyEverywhereUsingHealthEffect effect))
             {
@@ -73,14 +93,7 @@ namespace BrutalAPI
 
             effect._possibleEnemies.Add(enemy);
         }
-
-        /// <summary>
-        /// Use enum PoolList_GameIDs .ToString() option on poolListID for Massive Health spawn pools
-        /// </summary>
-        /// <param name="enemy"></param>
-        /// <param name="poolListID">Use enum PoolList_GameIDs .ToString() option on poolListID for Massive Health spawn pools</param>
-
-        public static void AddEnemyToTransformationPool(EnemySO enemy, string poolListID)
+        public static void AddEnemyToCustomTransformationPool(EnemySO enemy, string poolListID)
         {
             if (!LoadedDBsHandler.EnemyDB.TryGetEnemyPoolEffect(poolListID, out CasterRandomTransformationEffect effect))
             {
@@ -91,7 +104,7 @@ namespace BrutalAPI
             effect._possibleTransformations.Add(new TransformOption(enemy));
         }
     }
-    class Enemy
+    public class Enemy
     {
         public EnemySO enemy;
 
@@ -280,16 +293,16 @@ namespace BrutalAPI
             enemy.enemyLoot = new EnemyLoot(data);
         }
 
-        public void AddEnemy(bool addToBronzoPool = false, bool addToSepulchrePool = false, bool addToSmallPool = false)
+        public void AddEnemyToDataBases(bool addToBronzoPool = false, bool addToSepulchrePool = false, bool addToSmallPool = false)
         {
             LoadedDBsHandler.EnemyDB.AddNewEnemy(enemy.name, enemy);
 
             if (addToBronzoPool)
-                EnemyUtils.AddEnemyToSpawnPool(enemy, PoolList_GameIDs.Bronzo.ToString());
+                EnemyUtils.AddEnemyToSpawnPool(enemy, PoolList_GameIDs.Bronzo);
             if (addToSepulchrePool)
-                EnemyUtils.AddEnemyToHealthSpawnPool(enemy, PoolList_GameIDs.Sepulchre.ToString());
+                EnemyUtils.AddEnemyToHealthSpawnPool(enemy, PoolList_GameIDs.Sepulchre);
             if (addToSmallPool)
-                EnemyUtils.AddEnemyToSpawnPool(enemy, PoolList_GameIDs.SmallEnemy.ToString());
+                EnemyUtils.AddEnemyToSpawnPool(enemy, PoolList_GameIDs.SmallEnemy);
         }
     }
 }
