@@ -129,7 +129,7 @@ namespace BrutalAPI
                 if (rank > 3)
                 { WriteLine("A party member can't have a rank above 3"); return; }
 
-                info.Run.playerData.AddNewCharacter(LoadedAssetsHandler.GetCharacter(parameters[0]), rank, ability1, ability2);
+                info.Run.playerData.AddNewCharacter(LoadedAssetsHandler.GetCharacter(parameters[0]), rank, new int[] { ability1, ability2 });
                 { WriteLine("Added fool " + parameters[0] + " to your party"); return; }
             });
 
@@ -152,7 +152,7 @@ namespace BrutalAPI
                 if (!CombatManager.Instance._combatInitialized)
                 { WriteLine("Can't spawn an enemy when out of combat"); return; }
 
-                CombatManager.Instance.AddPriorityRootAction(new SpawnEnemyAction(LoadedAssetsHandler.GetEnemy(enemyid), slot, true, true, CombatTypeID.Spawn_Basic.ToString()));
+                CombatManager.Instance.AddPriorityRootAction(new SpawnEnemyAction(LoadedAssetsHandler.GetEnemy(enemyid), slot, true, true, CombatType_GameIDs.Spawn_Basic.ToString()));
                 { WriteLine("Spawned enemy " + parameters[0] + " in slot " + slot.ToString()); return; }
             });
 

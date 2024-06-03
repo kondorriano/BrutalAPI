@@ -176,7 +176,6 @@ namespace BrutalAPI
         {
             encounter.AddEnemyData(enemyIDs, slots);
         }
-
         public void AddEncounterToDataBases()
         {
             LoadedDBsHandler.EnemyDB.AddNewEnemyBundle(encounter.name, encounter);

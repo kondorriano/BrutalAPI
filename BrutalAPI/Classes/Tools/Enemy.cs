@@ -5,40 +5,6 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    /*
-    MAIN
-    +public string _enemyName = "";
-    +[UnitTypeEnumRef] public List<string> unitTypes = new List<string>();
-    + public int size;
-    +public PrioritySO priority;
-
-    HEALTH
-    +public int health;
-    +public ManaColorSO healthColor;
-
-    ABILITIES AND PASSIVES
-    +public BaseAbilitySelectorSO abilitySelector;
-    +public EnemyAbilityInfo[] abilities;
-    +public BasePassiveAbilitySO[] passiveAbilities;
-    
-
-    ASSETS
-    +public EnemyInFieldLayout enemyTemplate;
-    +public Sprite enemySprite;
-    +public Sprite enemyOverworldSprite;
-    +public Sprite enemyOWCorpseSprite;
-    
-    SPECIAL EFFECTS
-    +public EffectInfo[] enterEffects;
-    +public EffectInfo[] exitEffects;
-    
-    SOUNDS
-    +[FMODUnity.EventRef] public string damageSound;
-    +[FMODUnity.EventRef] public string deathSound;
-    
-    LOOT
-    public EnemyLoot enemyLoot;
-         */
     public class EnemyUtils
     {
         public static void AddEnemyToSpawnPool(EnemySO enemy, PoolList_GameIDs poolListID)
@@ -278,7 +244,6 @@ namespace BrutalAPI
             layout.m_Data = data;
             enemy.enemyTemplate = layout;
         }
-
         public void AddPassive(BasePassiveAbilitySO passive)
         {
             enemy.passiveAbilities.Add(passive);
@@ -287,13 +252,11 @@ namespace BrutalAPI
         {
             enemy.passiveAbilities.AddRange(passives);
         }
-
         public void AddLootData(EnemyLootItemProbability[] data)
         {
             enemy.enemyLoot = new EnemyLoot(data);
         }
-
-        public void AddEnemyToDataBases(bool addToBronzoPool = false, bool addToSepulchrePool = false, bool addToSmallPool = false)
+        public void AddEnemy(bool addToBronzoPool = false, bool addToSepulchrePool = false, bool addToSmallPool = false)
         {
             LoadedDBsHandler.EnemyDB.AddNewEnemy(enemy.name, enemy);
 
