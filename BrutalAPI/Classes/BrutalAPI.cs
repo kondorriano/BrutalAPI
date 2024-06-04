@@ -56,5 +56,14 @@ namespace BrutalAPI
                 fileStream.Close();
             }
         }
+
+        void Example()
+        {
+
+
+            Character myCharacter = new Character("Bronzo", "Bronzo_CH");
+
+
+        }
     }
 }

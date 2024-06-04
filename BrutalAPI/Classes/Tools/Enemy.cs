@@ -230,6 +230,7 @@ namespace BrutalAPI
             enemy.abilitySelector = LoadedDBsHandler.MiscDB.RarityAbilitySelector;
 
             //Initialize Lists here?
+            enemy.unitTypes = new List<string>();
             enemy.passiveAbilities = new List<BasePassiveAbilitySO>();
             enemy.abilities = new EnemyAbilityInfo[0];
             enemy.enterEffects = new EffectInfo[0];
@@ -255,6 +256,14 @@ namespace BrutalAPI
         public void AddLootData(EnemyLootItemProbability[] data)
         {
             enemy.enemyLoot = new EnemyLoot(data);
+        }
+        public void AddUnitType(string unitType)
+        {
+            enemy.unitTypes.Add(unitType);
+        }
+        public void AddUnitTypes(string[] unitTypes)
+        {
+            enemy.unitTypes.AddRange(unitTypes);
         }
         public void AddEnemy(bool addToBronzoPool = false, bool addToSepulchrePool = false, bool addToSmallPool = false)
         {

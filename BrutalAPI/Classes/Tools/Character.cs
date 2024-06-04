@@ -241,6 +241,7 @@ namespace BrutalAPI
             //Basic Slap
             character.basicCharAbility = LoadedDBsHandler.AbilityDB.SlapAbility;
             //Initialize Lists here?
+            character.unitTypes = new List<string>();
             character.m_BossAchData = new List<CharFinalBossAchData>();
             character.passiveAbilities = new List<BasePassiveAbilitySO>();
             character.rankedData = new List<CharacterRankedData>();
@@ -273,6 +274,14 @@ namespace BrutalAPI
         public void AddPassives(BasePassiveAbilitySO[] passives)
         {
             character.passiveAbilities.AddRange(passives);
+        }
+        public void AddUnitType(string unitType)
+        {
+            character.unitTypes.Add(unitType);
+        }
+        public void AddUnitTypes(string[] unitTypes)
+        {
+            character.unitTypes.AddRange(unitTypes);
         }
 
         public void AddCharacter(bool unlockCharacter = false, bool omitOnFoolsBoard = false)
