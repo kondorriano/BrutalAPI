@@ -12,6 +12,10 @@ namespace BrutalAPI
          */
 
         #region Item Pools
+        public static void JustAddItemGamePool(BaseWearableSO item)
+        {
+            LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item);
+        }
         public static void AddItemToShopStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
         {
             item.isShopItem = true;
