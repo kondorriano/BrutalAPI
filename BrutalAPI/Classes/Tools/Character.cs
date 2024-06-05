@@ -3,51 +3,6 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    /*
-    CHARACTERSO
-    +id
-    +name
-    +entity
-    +health
-    +unit types
-    +usesBasic
-    BasicAbility
-    +usesAll
-    -RankedData
-        +int health
-        abilities[]
-    Passives
-    -Animator
-    +FrontSprite
-    +BackSprite
-    +OWSprites
-    -ExtraSpriteSystem
-    +movesOnOW
-    +damageSound
-    +deathSound
-    +dxSound
-    +Ach - Boss[]
-    SPEAKER DATA NAME
-
-    ZONE
-    ShowOnFOOLS
-
-    PORTALS
-    Sign ID
-    Sign icon 
-    Sign Color
-
-    ACHS
-    Boss Unlocks
-
-    SELECTABLECHARACTER
-    id
-    portrait
-    noPortrait
-    trackData
-    isSecret
-    ignoreRandomSelection
-     */
     public class Character
     {
         public CharacterSO character;
@@ -245,6 +200,7 @@ namespace BrutalAPI
             character.m_BossAchData = new List<CharFinalBossAchData>();
             character.passiveAbilities = new List<BasePassiveAbilitySO>();
             character.rankedData = new List<CharacterRankedData>();
+            character.movesOnOverworld = true;
         }
 
         public void SetBasicAbility(CharacterAbility ab)

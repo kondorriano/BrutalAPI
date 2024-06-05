@@ -7,24 +7,6 @@ namespace BrutalAPI
 {
     public class Ability
     {
-        /*   
-        +ID
-        +abilitySprite;
-        +_abilityName = "";
-        +_description = "";
-        +PrioritySO priority;
-        
-        +public UnitStoredValueNames specialStoredValue = UnitStoredValueNames.None;
-
-        +AttackVisualsSO visuals;
-        +BaseCombatTargettingSO animationTarget;
-
-        
-        +public IntentTargetInfo[] intents;
-
-        +public EffectInfo[] effects;
-         */
-
         public AbilitySO ability;
 
         #region ABILITY PROPERTIES
@@ -118,12 +100,16 @@ namespace BrutalAPI
             ability.intents.Add(info);
         }
 
-        public Ability(string id)
+        public Ability(string name, string id)
         {
             ability = ScriptableObject.CreateInstance<AbilitySO>();
             ability.name = id;
+            ability._abilityName = name;
             ability.effects = new EffectInfo[0];
             ability.intents = new List<IntentTargetInfo>();
+            //Basic Priority
+            ability.priority = LoadedDBsHandler.MiscDB.DefaultPriority;
+            Rarity = LoadedDBsHandler.MiscDB.DefaultRarity;
         }
 
         public CharacterAbility GenerateCharacterAbility(bool addToDB = false)

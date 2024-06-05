@@ -224,6 +224,8 @@ namespace BrutalAPI
             enemy = ScriptableObject.CreateInstance<EnemySO>();
             ID_EN = id_EN;
             Name = displayName;
+            Size = 1;
+            Health = 1;
             //Basic Priority
             enemy.priority = LoadedDBsHandler.MiscDB.DefaultPriority;
             //Basic Ability selector
