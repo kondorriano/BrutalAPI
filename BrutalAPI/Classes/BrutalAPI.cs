@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using System.IO;
 using System.Xml;
 using UnityEngine;
@@ -8,9 +9,9 @@ namespace BrutalAPI
     [BepInPlugin("BrutalOrchestra.BrutalAPI", "BrutalAPI", "0.1.5")]
     public class BrutalAPI : BaseUnityPlugin
     {
-        public static char openDebugConsoleKey = '*';
         public DebugController m_DebugController;
-
+        private static ConfigEntry<string> _OpenDebugConsoleKey;
+        public static string OpenDebugConsoleKey { get => _OpenDebugConsoleKey.Value; }
 
         public void Awake()
         {
@@ -29,6 +30,14 @@ namespace BrutalAPI
 
         void LoadConfig()
         {
+            _OpenDebugConsoleKey = Config.Bind("Debug Console",      // The section under which the option is shown
+                                         "Open Console Key",  // The key of the configuration option in the configuration file
+                                         "*", // The default value
+                                         "They key that needs to be pressed to open the debug console."); // Description of the option to show in the config file
+            
+            Debug.Log(_OpenDebugConsoleKey.Value);
+
+            /*
             if (!Directory.Exists(Paths.BepInExRootPath + "/plugins/brutalapi/") || !File.Exists(Paths.BepInExRootPath + "/plugins/brutalapi/brutalapi.config"))
             {
                 Directory.CreateDirectory(Paths.BepInExRootPath + "/plugins/brutalapi/");
@@ -55,15 +64,7 @@ namespace BrutalAPI
 
                 fileStream.Close();
             }
-        }
-
-        void Example()
-        {
-
-
-            Character myCharacter = new Character("Bronzo", "Bronzo_CH");
-
-
+            */
         }
     }
 }

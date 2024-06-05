@@ -368,7 +368,7 @@ namespace BrutalAPI
         {
             orig(self, c);
 
-            if (c == BrutalAPI.openDebugConsoleKey)
+            if (c == BrutalAPI.OpenDebugConsoleKey[0])
                 DebugController.Instance.showConsole = !DebugController.Instance.showConsole;
         }
 
