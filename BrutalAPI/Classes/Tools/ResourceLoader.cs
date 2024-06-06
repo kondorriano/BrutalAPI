@@ -10,71 +10,54 @@ namespace BrutalAPI
 {
     public static class ResourceLoader
     {
-        public static Texture2D LoadTexture(string name)
+        public static Texture2D LoadTexture(string name, Assembly assembly = null)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = assembly.GetManifestResourceNames().First(r => r.Contains(name));
-            var resource = assembly.GetManifestResourceStream(resourceName);
-            using var memoryStream = new MemoryStream();
-            var buffer = new byte[16384];
-            int count;
-            while ((count = resource!.Read(buffer, 0, buffer.Length)) > 0)
-                memoryStream.Write(buffer, 0, count);
-            var spriteTexture = new Texture2D(0, 0, TextureFormat.ARGB32, false)
+            assembly ??= Assembly.GetCallingAssembly();
+            var textureBytes = ResourceBinary(name, assembly);
+
+            if (textureBytes == null)
+            {
+                Debug.LogError("Missing Texture! Check for typos when using ResourceLoader.LoadSprite() and that all of your textures have their build action as Embedded Resource.");
+
+                return null;
+            }
+
+            var tex = new Texture2D(0, 0, TextureFormat.ARGB32, false)
             {
                 anisoLevel = 1,
                 filterMode = 0
             };
 
-            spriteTexture.LoadImage(memoryStream.ToArray());
-            return spriteTexture;
+            tex.LoadImage(textureBytes);
+
+            return tex;
         }
 
-        public static Sprite LoadSprite(string name, Vector2? pivot = null, int ppu = 32)
+        public static Sprite LoadSprite(string name, Vector2? pivot = null, int ppu = 32, Assembly assembly = null)
         {
-            if (pivot == null) { pivot = new Vector2(0.5f, 0.5f); }
-            var assembly = Assembly.GetExecutingAssembly();
+            assembly ??= Assembly.GetCallingAssembly();
+            var tex = LoadTexture(name, assembly);
 
-            Sprite sprite;
+            if (tex == null)
+                return null;
 
-            try
-            {
-                var resourceName = assembly.GetManifestResourceNames().First(r => r.Contains(name));
-                var resource = assembly.GetManifestResourceStream(resourceName);
-                using var memoryStream = new MemoryStream();
-                var buffer = new byte[16384];
-                int count;
-                while ((count = resource!.Read(buffer, 0, buffer.Length)) > 0)
-                    memoryStream.Write(buffer, 0, count);
-                var spriteTexture = new Texture2D(0, 0, TextureFormat.ARGB32, false)
-                {
-                    anisoLevel = 1,
-                    filterMode = 0
-                };
-
-                spriteTexture.LoadImage(memoryStream.ToArray());
-                sprite = Sprite.Create(spriteTexture, new Rect(0, 0, spriteTexture.width, spriteTexture.height), (Vector2)pivot, ppu);
-
-            }
-            catch (InvalidOperationException)
-            {
-                throw new Exception("Missing Texture! Check for typos when using ResourceLoader.LoadSprite() and that all of your textures have their build action as Embedded Resource.");
-            }
-
-            return sprite;
+            return Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), pivot ?? new Vector2(0.5f, 0.5f), ppu);
         }
 
-        public static byte[] ResourceBinary(string name)
+        public static byte[] ResourceBinary(string name, Assembly assembly = null)
         {
-            Assembly a = Assembly.GetExecutingAssembly();
-            var resourceName = a.GetManifestResourceNames().First(r => r.Contains(name));
-            using (Stream resFilestream = a.GetManifestResourceStream(resourceName))
-            {
-                if (resFilestream == null) return null;
-                byte[] ba = new byte[resFilestream.Length];
-                resFilestream.Read(ba, 0, ba.Length);
-                return ba;
-            }
+            assembly ??= Assembly.GetCallingAssembly();
+            var resname = assembly.GetManifestResourceNames().FirstOrDefault(x => x == name || x.EndsWith($".{name}") || x.Contains($".{name}."));
+
+            if (string.IsNullOrEmpty(resname))
+                return null;
+
+            using var stream = assembly.GetManifestResourceStream(resname);
+
+            var ba = new byte[stream.Length];
+            stream.Read(ba, 0, ba.Length);
+
+            return ba;
         }
 
         public static AssetBundle LoadAssetBundle(string bundlePath)
