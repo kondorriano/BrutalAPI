@@ -89,7 +89,7 @@ namespace BrutalAPI
         static public AttackVisualsSO Takedown => LoadedDBsHandler.MiscDB.GetVisuals("Takedown");
         static public AttackVisualsSO Talons => LoadedDBsHandler.MiscDB.GetVisuals("Talons");
         static public AttackVisualsSO Tango => LoadedDBsHandler.MiscDB.GetVisuals("Tango");
-        static public AttackVisualsSO Tho => LoadedDBsHandler.MiscDB.GetVisuals("Tho");
+        static public AttackVisualsSO Thorns => LoadedDBsHandler.MiscDB.GetVisuals("Thorns");
         static public AttackVisualsSO Torched => LoadedDBsHandler.MiscDB.GetVisuals("Torched");
         static public AttackVisualsSO UglyOnTheInside => LoadedDBsHandler.MiscDB.GetVisuals("UglyOnTheInside");
         static public AttackVisualsSO Weep => LoadedDBsHandler.MiscDB.GetVisuals("Weep");
