@@ -100,6 +100,16 @@ namespace BrutalAPI
             ability.intents.Add(info);
         }
 
+        public Ability(string id)
+        {
+            ability = ScriptableObject.CreateInstance<AbilitySO>();
+            ability.name = id;
+            ability.effects = new EffectInfo[0];
+            ability.intents = new List<IntentTargetInfo>();
+            //Basic Priority
+            ability.priority = LoadedDBsHandler.MiscDB.DefaultPriority;
+            Rarity = LoadedDBsHandler.MiscDB.DefaultRarity;
+        }
         public Ability(string name, string id)
         {
             ability = ScriptableObject.CreateInstance<AbilitySO>();

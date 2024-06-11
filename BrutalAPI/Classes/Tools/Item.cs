@@ -12,38 +12,72 @@ namespace BrutalAPI
          */
 
         #region Item Pools
-        public static void JustAddItemGamePool(BaseWearableSO item)
+        /// <summary>
+        /// Just adds the item so it can be loaded in game. But does not add it into any item stats pool or the Shop or Treasure Pool.
+        /// </summary>
+        /// <param name="item"></param>
+        public static void JustAddItemSoItCanBeLoaded(BaseWearableSO item)
         {
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item);
         }
+        /// <summary>
+        /// Adds your item so it can be loaded in game. Also adds it into the Shop stats and Shop Pool.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="itemStats"></param>
         public static void AddItemToShopStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
         {
             item.isShopItem = true;
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, true, false, "Shop", "Shop");
         }
+        /// <summary>
+        /// Adds your item so it can be loaded in game. Also adds it into the Treasure stats and Treasure pool.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="itemStats"></param>
         public static void AddItemToTreasureStatsCategoryAndGamePool(BaseWearableSO item, ItemModdedUnlockInfo itemStats = null)
         {
             item.isShopItem = false;
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, false, true, "Treasure", "Treasure");
         }
+        /// <summary>
+        /// Adds your item so it can be loaded. Also adds it into a custom stats pool. Anad can also be added to Shop or Treasure pool.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="categoryID"></param>
+        /// <param name="categoryDisplayName"></param>
+        /// <param name="itemStats"></param>
+        /// <param name="addToShopGamePool"></param>
+        /// <param name="addToTreasureGamePool"></param>
         public static void AddItemToCustomStatsCategoryAndGamePool(BaseWearableSO item, string categoryID, string categoryDisplayName,
             ItemModdedUnlockInfo itemStats, bool addToShopGamePool = false, bool addToTreasureGamePool = false)
         {
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, addToShopGamePool, addToTreasureGamePool, categoryID, categoryDisplayName);
         }
         /// <summary>
-        /// Use enum PoolList_GameIDs .ToString() option on lootListID for in game fishing pools
+        /// You can add loot to cutom loot pools. But, if the pool is not created, you could also create it yourself.
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="lootListID">Use enum PoolList_GameIDs .ToString() option on lootListID for in game fishing pools</param>
+        /// <param name="lootListID"></param>
         /// <param name="rarity"></param>
         /// <param name="addToLockedItem"></param>
-        public static void AddItemToLootPool(BaseWearableSO item, string lootListID, int rarity, bool addToLockedItem = false)
+        public static ExtraLootListEffect AddItemToCustomLootPool(BaseWearableSO item, string lootListID, int rarity, bool addToLockedItem = false, bool createIfDoesNotExists = false)
         {
             if (!LoadedDBsHandler.ItemPoolDB.TryGetItemLootListEffect(lootListID, out ExtraLootListEffect list))
             {
-                Debug.LogError($"No Pool with ID {lootListID}");
-                return;
+                if (!createIfDoesNotExists)
+                {
+                    Debug.LogError($"No Pool with ID {lootListID} you did not set the createIfDoesNotExists to true");
+                    return null;
+                }
+                list = ScriptableObject.CreateInstance<ExtraLootListEffect>();
+                list._lockedLootableItems = new List<LootItemProbability>();
+                list._lootableItems = new List<LootItemProbability>();
+                list._nothingPercentage = 40;
+                list._shopPercentage = 2;
+                list._treasurePercentage = 1;
+
+                LoadedDBsHandler.ItemPoolDB.AddItemLootListEffect(lootListID, list);
             }
 
             LootItemProbability data = new LootItemProbability(item.name, rarity);
@@ -51,14 +85,16 @@ namespace BrutalAPI
                 list._lockedLootableItems.Add(data);
             else
                 list._lootableItems.Add(data);
+
+            return list;
         }
         public static void AddItemFishingRodPool(BaseWearableSO item, int rarity, bool addToLockedItem = false)
         {
-            AddItemToLootPool(item, PoolList_GameIDs.FishingRod.ToString(), rarity, addToLockedItem);
+            AddItemToCustomLootPool(item, PoolList_GameIDs.FishingRod.ToString(), rarity, addToLockedItem);
         }
         public static void AddItemCanOfWormsPool(BaseWearableSO item, int rarity, bool addToLockedItem = false)
         {
-            AddItemToLootPool(item, PoolList_GameIDs.CanOfWorms_WelsCatfish.ToString(), rarity, addToLockedItem);
+            AddItemToCustomLootPool(item, PoolList_GameIDs.CanOfWorms_WelsCatfish.ToString(), rarity, addToLockedItem);
         }
 
         #endregion
