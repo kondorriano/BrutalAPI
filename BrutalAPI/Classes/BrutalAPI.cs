@@ -21,6 +21,7 @@ namespace BrutalAPI
                 */
 
             LoadConfig();
+            Pigments.ReplaceBasePigmentHealthSprites();
 
 
             m_DebugController = new GameObject("DebugController").AddComponent<DebugController>();
