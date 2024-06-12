@@ -7,6 +7,44 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\SplitPigment\Split2_Health.png" />
+    <None Remove="Resources\SplitPigment\Split2_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split3_Health.png" />
+    <None Remove="Resources\SplitPigment\Split3_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split4_Health.png" />
+    <None Remove="Resources\SplitPigment\Split4_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split5_Health.png" />
+    <None Remove="Resources\SplitPigment\Split5_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split6_Health.png" />
+    <None Remove="Resources\SplitPigment\Split6_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split7_Health.png" />
+    <None Remove="Resources\SplitPigment\Split7_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split8_Health.png" />
+    <None Remove="Resources\SplitPigment\Split8_Pigment.png" />
+    <None Remove="Resources\SplitPigment\Split9_Health.png" />
+    <None Remove="Resources\SplitPigment\Split9_Pigment.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SplitPigment\Split2_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split2_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split3_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split3_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split4_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split4_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split5_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split5_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split6_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split6_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split7_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split7_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split8_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split8_Pigment.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split9_Health.png" />
+    <EmbeddedResource Include="Resources\SplitPigment\Split9_Pigment.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\References\BrutalOrchestra\Assembly-CSharp.dll</HintPath>
     </Reference>
