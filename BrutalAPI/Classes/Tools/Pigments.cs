@@ -8,6 +8,7 @@ namespace BrutalAPI
 {
     public static class Pigments
     {
+        #region In-Game Pigment Gets
         static public ManaColorSO Blue => LoadedDBsHandler.PigmentDB.GetPigment("Blue");
         static public ManaColorSO Purple => LoadedDBsHandler.PigmentDB.GetPigment("Purple");
         static public ManaColorSO Red => LoadedDBsHandler.PigmentDB.GetPigment("Red");
@@ -26,7 +27,9 @@ namespace BrutalAPI
         static public ManaColorSO YellowBlue => LoadedDBsHandler.PigmentDB.GetPigment("YB");
         static public ManaColorSO YellowRed => LoadedDBsHandler.PigmentDB.GetPigment("YR");
         static public ManaColorSO YellowPurple => LoadedDBsHandler.PigmentDB.GetPigment("YP");
+        #endregion
 
+        #region Split Pigment and Health Fields
         private static readonly Dictionary<ManaColorSO[], ManaColorSO> AlreadyMadeSplitPigment = new()
         {
             { [Blue, Purple], BluePurple },
@@ -83,6 +86,10 @@ namespace BrutalAPI
             new(0, 0, 0, 0)
         };
 
+        #endregion
+
+        #region Basic Pigment Functions
+
         static public ManaColorSO GetPigmentWithID(string id)
         {
             return LoadedDBsHandler.PigmentDB.GetPigment(id);
@@ -92,6 +99,9 @@ namespace BrutalAPI
         {
             LoadedDBsHandler.PigmentDB.AddNewPigment(id, pigment);
         }
+        #endregion
+
+        #region Split Pigment and Health Functions
 
         public static ManaColorSO SplitPigment(params ManaColorSO[] components)
         {
@@ -99,39 +109,6 @@ namespace BrutalAPI
                 return spligment;
 
             return AlreadyMadeSplitPigment[components] = MakeNewSplitPigment(components);
-        }
-
-        internal static void ReplaceBasePigmentHealthSprites()
-        {
-            var tex = new Texture2D(90, 132, TextureFormat.ARGB32, false)
-            {
-                anisoLevel = 1,
-                filterMode = 0,
-                name = "BaseSplitPigmentHealth"
-            };
-
-            var b = Blue.healthSprite;
-            var r = Red.healthSprite;
-            var y = Yellow.healthSprite;
-            var p = Purple.healthSprite;
-
-            BluePurple.healthSprite =   StitchPigmentSprites(SplitPigmentHealthSprites, [b, p], tex, 0, 0, 1);
-            BlueRed.healthSprite =      StitchPigmentSprites(SplitPigmentHealthSprites, [b, r], tex, 0, 11, 2);
-            BlueYellow.healthSprite =   StitchPigmentSprites(SplitPigmentHealthSprites, [b, y], tex, 0, 22, 3);
-
-            PurpleBlue.healthSprite =   StitchPigmentSprites(SplitPigmentHealthSprites, [p, b], tex, 0, 33, 4);
-            PurpleRed.healthSprite =    StitchPigmentSprites(SplitPigmentHealthSprites, [p, r], tex, 0, 44, 5);
-            PurpleYellow.healthSprite = StitchPigmentSprites(SplitPigmentHealthSprites, [p, y], tex, 0, 55, 6);
-
-            RedBlue.healthSprite =      StitchPigmentSprites(SplitPigmentHealthSprites, [r, b], tex, 0, 66, 7);
-            RedPurple.healthSprite =    StitchPigmentSprites(SplitPigmentHealthSprites, [r, p], tex, 0, 77, 8);
-            RedYellow.healthSprite =    StitchPigmentSprites(SplitPigmentHealthSprites, [r, y], tex, 0, 88, 9);
-
-            YellowBlue.healthSprite =   StitchPigmentSprites(SplitPigmentHealthSprites, [y, b], tex, 0, 99, 10);
-            YellowRed.healthSprite =    StitchPigmentSprites(SplitPigmentHealthSprites, [y, r], tex, 0, 110, 11);
-            YellowPurple.healthSprite = StitchPigmentSprites(SplitPigmentHealthSprites, [y, p], tex, 0, 121, 12);
-
-            tex.Apply();
         }
 
         private static ManaColorSO MakeNewSplitPigment(ManaColorSO[] components)
@@ -266,5 +243,6 @@ namespace BrutalAPI
 
             return sprite;
         }
+        #endregion
     }
 }

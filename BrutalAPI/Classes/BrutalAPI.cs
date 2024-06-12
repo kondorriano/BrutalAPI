@@ -15,14 +15,7 @@ namespace BrutalAPI
 
         public void Awake()
         {
-            /*
-            LoadedDBsHandler.UnlockablesDB.TryGetFinalBossUnlockCheck(BossTypeIDs.OsmanSinnoks.ToString(), out FinalBossCharUnlockCheck check);
-            check.entityIDUnlocks.Add
-                */
-
             LoadConfig();
-            Pigments.ReplaceBasePigmentHealthSprites();
-
 
             m_DebugController = new GameObject("DebugController").AddComponent<DebugController>();
 

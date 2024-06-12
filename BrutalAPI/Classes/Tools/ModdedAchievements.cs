@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Achievement
+    public class ModdedAchievements
     {
         public ModdedAchievement_t achievement;
 
@@ -65,7 +65,7 @@ namespace BrutalAPI
         }
         #endregion
 
-        public Achievement(string displayName, string description, Sprite unlockSprite, string id_ACH)
+        public ModdedAchievements(string displayName, string description, Sprite unlockSprite, string id_ACH)
         {
             achievement = new ModdedAchievement_t(id_ACH, displayName, description);
             achievement.m_unlockedSprite = unlockSprite;

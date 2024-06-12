@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace BrutalAPI
 {
@@ -77,5 +78,21 @@ namespace BrutalAPI
         static public BasePassiveAbilitySO Example_Parental_Vengeance => LoadedAssetsHandler.GetPassive("Parental_Vengeance_PA");
         static public BasePassiveAbilitySO Example_BonusAttack_Mangle => LoadedAssetsHandler.GetPassive("Mangle_PA");
         static public BasePassiveAbilitySO Example_Decay_MudLung => LoadedAssetsHandler.GetPassive("Decay_MudLung_Mung_PA");
+
+
+        static public BasePassiveAbilitySO GetCustomPassive(string passiveID)
+        {
+            return LoadedAssetsHandler.GetPassive(passiveID);
+        }
+        static public void AddCustomPassiveToPool(BasePassiveAbilitySO passive)
+        {
+            if(passive.name == "")
+            {
+                Debug.LogError($"This passive has no ID! Do it by setting it like this: myPassive.name = myID");
+                return;
+            }
+
+            LoadedDBsHandler.PassiveDB.AddNewPassive(passive.name, passive);
+        }
     }
 }
