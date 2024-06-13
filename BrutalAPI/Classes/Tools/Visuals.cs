@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace BrutalAPI
 {
@@ -97,5 +98,29 @@ namespace BrutalAPI
         static public AttackVisualsSO Wriggle => LoadedDBsHandler.MiscDB.GetVisuals("Wriggle");
         static public AttackVisualsSO WrigglingWrath => LoadedDBsHandler.MiscDB.GetVisuals("WrigglingWrath");
         static public AttackVisualsSO Writhe => LoadedDBsHandler.MiscDB.GetVisuals("Writhe");
+
+        static public AttackVisualsSO GetCustomVisuals(string visualsID)
+        {
+            return LoadedDBsHandler.MiscDB.GetVisuals(visualsID);
+        }
+        /// <summary>
+        /// Be careful, if the ID is already in use, it will create the Visuals but not add it to the Pool!
+        /// </summary>
+        /// <returns></returns>
+        static public AttackVisualsSO CreateAndAddCustomVisualsToPool(string clipBundlePath, AssetBundle fileBundle, string visualsID, string audioReference, bool isFullscreen = false)
+        {
+            AttackVisualsSO visuals = ScriptableObject.CreateInstance<AttackVisualsSO>();
+            visuals.animation = fileBundle.LoadAsset<AnimationClip>(clipBundlePath);
+            visuals.audioReference = audioReference;
+            visuals.isAnimationFullScreen = isFullscreen;
+
+            LoadedDBsHandler.MiscDB.AddNewVisuals(visualsID, visuals);
+            return visuals;
+        }
+
+        static public void AddCustomVisualsToPool(AttackVisualsSO visuals, string visualsID)
+        {
+            LoadedDBsHandler.MiscDB.AddNewVisuals(visualsID, visuals);
+        }
     }
 }

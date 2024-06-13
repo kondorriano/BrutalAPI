@@ -54,6 +54,7 @@ namespace BrutalAPI
         {
             LoadedDBsHandler.ItemUnlocksDB.AddNewItem(item.name, item, itemStats, addToShopGamePool, addToTreasureGamePool, categoryID, categoryDisplayName);
         }
+        
         /// <summary>
         /// You can add loot to cutom loot pools. But, if the pool is not created, you could also create it yourself.
         /// </summary>
@@ -61,11 +62,32 @@ namespace BrutalAPI
         /// <param name="lootListID"></param>
         /// <param name="rarity"></param>
         /// <param name="addToLockedItem"></param>
-        public static ExtraLootListEffect AddItemToCustomLootPool(BaseWearableSO item, string lootListID, int rarity, bool addToLockedItem = false, bool createIfDoesNotExists = false)
+        public static void AddItemToCustomLootPool(BaseWearableSO item, string lootListID, int rarity, bool addToLockedItem = false)
         {
             if (!LoadedDBsHandler.ItemPoolDB.TryGetItemLootListEffect(lootListID, out ExtraLootListEffect list))
             {
-                if (!createIfDoesNotExists)
+                Debug.LogError($"No Pool with ID {lootListID}");
+                return;
+            }
+
+            LootItemProbability data = new LootItemProbability(item.name, rarity);
+            if (addToLockedItem)
+                list._lockedLootableItems.Add(data);
+            else
+                list._lootableItems.Add(data);
+        }
+        
+        /// <summary>
+        /// Returns the loot list with the ID. You can create a new loot list if it does not exist.
+        /// </summary>
+        /// <param name="lootListID"></param>
+        /// <param name="createIfDoesNotExist"></param>
+        /// <returns></returns>
+        public static ExtraLootListEffect GetLootPool(string lootListID, bool createIfDoesNotExist = false)
+        {
+            if (!LoadedDBsHandler.ItemPoolDB.TryGetItemLootListEffect(lootListID, out ExtraLootListEffect list))
+            {
+                if (!createIfDoesNotExist)
                 {
                     Debug.LogError($"No Pool with ID {lootListID} you did not set the createIfDoesNotExists to true");
                     return null;
@@ -79,12 +101,6 @@ namespace BrutalAPI
 
                 LoadedDBsHandler.ItemPoolDB.AddItemLootListEffect(lootListID, list);
             }
-
-            LootItemProbability data = new LootItemProbability(item.name, rarity);
-            if (addToLockedItem)
-                list._lockedLootableItems.Add(data);
-            else
-                list._lootableItems.Add(data);
 
             return list;
         }

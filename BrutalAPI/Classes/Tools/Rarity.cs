@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace BrutalAPI
 {
@@ -14,5 +15,30 @@ namespace BrutalAPI
         static public RaritySO AbsurdlyRare => LoadedDBsHandler.MiscDB.GetRarity("AbsurdlyRare");
         static public RaritySO Impossible => LoadedDBsHandler.MiscDB.GetRarity("Impossible");
         static public RaritySO ImpossibleNoReroll => LoadedDBsHandler.MiscDB.GetRarity("ImpossibleNoReroll");
+
+
+        static public RaritySO GetCustomRarity(string id)
+        {
+            return LoadedDBsHandler.MiscDB.GetRarity(id);
+        }
+
+        /// <summary>
+        /// Be careful, if the ID is already in use, it will create the Rarity but not add it to the Pool!
+        /// </summary>
+        /// <returns></returns>
+        static public RaritySO CreateAndAddCustomRarityToPool(string id, int rarityValue, bool canBeRerolled = true)
+        {
+            RaritySO rarity = ScriptableObject.CreateInstance<RaritySO>();
+            rarity.rarityValue = rarityValue;
+            rarity.canBeRerolled = canBeRerolled;
+
+            LoadedDBsHandler.MiscDB.AddNewRarity(id, rarity);
+            return rarity;
+        }
+
+        static public void AddCustomRarityToPool(RaritySO rarity, string id)
+        {
+            LoadedDBsHandler.MiscDB.AddNewRarity(id, rarity);
+        }
     }
 }
