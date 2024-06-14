@@ -239,7 +239,6 @@ namespace BrutalAPI
         {
             character.unitTypes.AddRange(unitTypes);
         }
-
         public void AddCharacter(bool unlockCharacter = false, bool omitOnFoolsBoard = false)
         {
             LoadedDBsHandler.CharacterDB.AddNewCharacter(character.name, character, menuCharacter, ignoredSupport, ignoredDPS);

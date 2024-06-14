@@ -109,6 +109,7 @@ namespace BrutalAPI
             //Basic Priority
             ability.priority = LoadedDBsHandler.MiscDB.DefaultPriority;
             Rarity = LoadedDBsHandler.MiscDB.DefaultRarity;
+            Cost = [];
         }
         public Ability(string name, string id)
         {
@@ -120,6 +121,19 @@ namespace BrutalAPI
             //Basic Priority
             ability.priority = LoadedDBsHandler.MiscDB.DefaultPriority;
             Rarity = LoadedDBsHandler.MiscDB.DefaultRarity;
+            Cost = [];
+        }
+        /// <summary>
+        /// Use this one to Clone an existing AbilitySO!
+        /// </summary>
+        /// <param name="abilityToClone"></param>
+        /// <param name="abilityID"></param>
+        public Ability(AbilitySO abilityToClone, string abilityID, ManaColorSO[] cost = null, RaritySO rarity = null)
+        {
+            ability = abilityToClone.Clone();
+            ability.name = abilityID;
+            Cost = (cost == null) ? [] :cost;
+            Rarity = (rarity == null) ? LoadedDBsHandler.MiscDB.DefaultRarity : rarity;
         }
 
         public CharacterAbility GenerateCharacterAbility(bool addToDB = false)
@@ -132,7 +146,6 @@ namespace BrutalAPI
             ab.cost = Cost;
             return ab;
         }
-
         public EnemyAbilityInfo GenerateEnemyAbility(bool addToDB = false)
         {
             if (addToDB)
