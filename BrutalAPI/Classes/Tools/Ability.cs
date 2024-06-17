@@ -5,6 +5,53 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
+    public class AbilityUtils
+    {
+        public static void AddSlapModifierToAbilityToPool(BasicAbilityChange_Wearable_SMS ability, PoolList_GameIDs poolListID)
+        {
+            if (!LoadedDBsHandler.AbilityDB.TryGetExtraAbilityPoolEffect(poolListID.ToString(), out CasterAddRandomExtraAbilityEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
+
+            effect._slapData.Add(ability);
+        }
+
+        public static void AddExtraAbilityToAbilityToPool(ExtraAbility_Wearable_SMS ability, PoolList_GameIDs poolListID)
+        {
+            if (!LoadedDBsHandler.AbilityDB.TryGetExtraAbilityPoolEffect(poolListID.ToString(), out CasterAddRandomExtraAbilityEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
+
+            effect._extraData.Add(ability);
+        }
+
+
+        public static void AddSlapModifierToCustomAbilityToPool(BasicAbilityChange_Wearable_SMS ability, string poolListID)
+        {
+            if (!LoadedDBsHandler.AbilityDB.TryGetExtraAbilityPoolEffect(poolListID, out CasterAddRandomExtraAbilityEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
+
+            effect._slapData.Add(ability);
+        }
+
+        public static void AddExtraAbilityToCustomAbilityToPool(ExtraAbility_Wearable_SMS ability, string poolListID)
+        {
+            if (!LoadedDBsHandler.AbilityDB.TryGetExtraAbilityPoolEffect(poolListID, out CasterAddRandomExtraAbilityEffect effect))
+            {
+                Debug.LogError($"No Pool with ID {poolListID}");
+                return;
+            }
+
+            effect._extraData.Add(ability);
+        }
+    }
     public class Ability
     {
         public AbilitySO ability;
