@@ -8,7 +8,24 @@ namespace BrutalAPI
 {
     public  class Misc
     {
-        public static void AddVSAnimationData(string bossID, VsBossData data)
+        /// <summary>
+        /// Be careful, if the ID is already in use, it will create the VSData but not add it to the Pool!
+        /// </summary>
+        /// <returns></returns>
+        static public VsBossData CreateAndAddCustom_VSAnimationData(string bossID, AnimationClip clip, Sprite bossSprite, Sprite signatureSprite, Sprite arenaSprite, Sprite extraSignature = null, Sprite extraArena = null)
+        {
+            VsBossData data = new VsBossData();
+            data.animation = clip;
+            data.bossSprite = bossSprite;
+            data.signatureSprite = signatureSprite;
+            data.arenaSprite = arenaSprite;
+            data.extraSignatureSprite = extraSignature;
+            data.extraArenaSprite = extraArena;
+
+            LoadedDBsHandler.VSAnimDB.AddVSAnimData(bossID, data);
+            return data;
+        }
+        public static void AddCustom_VSAnimationData(string bossID, VsBossData data)
         {
             LoadedDBsHandler.VSAnimDB.AddVSAnimData(bossID, data);
         }

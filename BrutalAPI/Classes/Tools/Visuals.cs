@@ -107,10 +107,10 @@ namespace BrutalAPI
         /// Be careful, if the ID is already in use, it will create the Visuals but not add it to the Pool!
         /// </summary>
         /// <returns></returns>
-        static public AttackVisualsSO CreateAndAddCustomVisualsToPool(string clipBundlePath, AssetBundle fileBundle, string visualsID, string audioReference, bool isFullscreen = false)
+        static public AttackVisualsSO CreateAndAddCustomVisualsToPool(string visualsID, AnimationClip clip, string audioReference, bool isFullscreen = false)
         {
             AttackVisualsSO visuals = ScriptableObject.CreateInstance<AttackVisualsSO>();
-            visuals.animation = fileBundle.LoadAsset<AnimationClip>(clipBundlePath);
+            visuals.animation = clip;
             visuals.audioReference = audioReference;
             visuals.isAnimationFullScreen = isFullscreen;
 
@@ -118,7 +118,7 @@ namespace BrutalAPI
             return visuals;
         }
 
-        static public void AddCustomVisualsToPool(AttackVisualsSO visuals, string visualsID)
+        static public void AddCustomVisualsToPool(string visualsID, AttackVisualsSO visuals)
         {
             LoadedDBsHandler.MiscDB.AddNewVisuals(visualsID, visuals);
         }

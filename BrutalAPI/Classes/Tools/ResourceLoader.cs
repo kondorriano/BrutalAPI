@@ -71,5 +71,15 @@ namespace BrutalAPI
             }
             return bundle;
         }
+
+        public static AnimationClip LoadAnimationFromAssetBundle(string clipBundlePath, AssetBundle fileBundle)
+        {
+            return fileBundle.LoadAsset<AnimationClip>(clipBundlePath);
+        }
+
+        public static YarnProgram LoadYarnProgramFromAssetBundle(string yarnBundlePath, AssetBundle fileBundle)
+        {
+            return fileBundle.LoadAsset<YarnProgram>(yarnBundlePath);
+        }
     }
 }

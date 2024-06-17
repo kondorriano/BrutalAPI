@@ -84,6 +84,9 @@
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>..\..\References\Unity\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
+    <Reference Include="YarnSpinner.Unity">
+      <HintPath>..\..\References\Unity\YarnSpinner.Unity.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
