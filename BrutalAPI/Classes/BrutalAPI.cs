@@ -3,13 +3,19 @@ using BepInEx.Configuration;
 using System.IO;
 using System.Xml;
 using UnityEngine;
+using HarmonyLib;
 
 namespace BrutalAPI
 {
-    [BepInPlugin("BrutalOrchestra.BrutalAPI", "BrutalAPI", "0.1.5")]
+    [BepInPlugin(GUID, NAME, VERSION)]
     public class BrutalAPI : BaseUnityPlugin
     {
-        public DebugController m_DebugController;
+        public const string GUID = "BrutalOrchestra.BrutalAPI";
+        public const string NAME = "BrutalAPI";
+        public const string VERSION = "0.3";
+
+        private static Harmony HarmonyInstance;
+
         private static ConfigEntry<string> _OpenDebugConsoleKey;
         public static string OpenDebugConsoleKey { get => _OpenDebugConsoleKey.Value; }
 
@@ -17,7 +23,10 @@ namespace BrutalAPI
         {
             LoadConfig();
 
-            m_DebugController = new GameObject("DebugController").AddComponent<DebugController>();
+            HarmonyInstance = new Harmony(GUID);
+            HarmonyInstance.PatchAll();
+
+            _ = DebugController.Instance; // Ensure DebugController's existence.
 
             Logger.LogInfo("BrutalAPI loaded successfully!");
         }
