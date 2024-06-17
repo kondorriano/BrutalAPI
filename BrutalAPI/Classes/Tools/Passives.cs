@@ -220,7 +220,6 @@ namespace BrutalAPI
         };
 
         private static readonly EffectorConditionSO Abomination_EffectorCondition = Abomination1.conditions[0];
-        private static readonly UnitStoreData_BasicSO Abomination_ExtraAttacks_SV = (Abomination1 as IntegerSetterByStoredValuePassiveAbility).unitStoredData;
 
         private static readonly EffectSO BoneSpurs_Damage_Effect = (BoneSpurs1 as PerformEffectPassiveAbility).effects[0].effect;
         private static readonly UnitStoreData_BasicSO BoneSpurs_ExtraDamage_SV = BoneSpurs1.specialStoredData;
@@ -233,9 +232,6 @@ namespace BrutalAPI
         private static readonly EffectSO Construct_CheckAbilities_Effect = (Construct as Connection_PerformEffectPassiveAbility).connectionEffects[0].effect;
         private static readonly EffectSO Construct_AddAbility_Effect = (Construct as Connection_PerformEffectPassiveAbility).connectionEffects[1].effect;
         private static readonly EffectConditionSO Construct_CheckAbilities_EffectCondition = (Construct as Connection_PerformEffectPassiveAbility).connectionEffects[1].condition;
-
-        private static readonly UnitStoreData_BasicSO Fleeting_Turns_SV = (Fleeting1 as FleetingPassiveAbility).fleeting_USD;
-        private static readonly UnitStoreData_BasicSO Fleeting_Turns_IgnoreFirst_SV = (Fleeting3IgnoreFirst as FleetingPassiveAbility).fleetingIgnoreFirstTurn_USD;
 
         private static readonly EffectorConditionSO Formless_EffectorCondition = Formless.conditions[0];
 
@@ -302,7 +298,7 @@ namespace BrutalAPI
                 pa.doesPassiveTriggerInformationPanel = false;
                 pa.specialStoredData = null;
 
-                pa.unitStoredData = Abomination_ExtraAttacks_SV;
+                pa.unitStoredDataID = UnitStoredValueNames_GameIDs.AbominationPA.ToString();
                 pa._postIncreaseStored = true;
                 pa.postIncreaseValue = x;
 
@@ -501,8 +497,8 @@ namespace BrutalAPI
 
                 pa._ignoreFirstTurn = ignoreFirstTurn;
                 pa._turnsBeforeFleeting = x;
-                pa.fleeting_USD = Fleeting_Turns_SV;
-                pa.fleetingIgnoreFirstTurn_USD = ignoreFirstTurn ? Fleeting_Turns_IgnoreFirst_SV : null;
+                pa.fleeting_USD = UnitStoredValueNames_GameIDs.FleetingPA.ToString();
+                pa.fleetingIgnoreFirstTurn_USD = UnitStoredValueNames_GameIDs.FleetingPA_IgnoreFirstTurn.ToString();
 
                 return pa;
             });
@@ -617,7 +613,7 @@ namespace BrutalAPI
                 pa._addsXInfestationEnemies = x;
                 pa._selfDamageMultiplierPerEnemy = 1;
                 pa._useDealt = true;
-                pa.infestation_USD = Infestation_Increase_SV;
+                pa.infestation_USD = UnitStoredValueNames_GameIDs.InfestationPA.ToString();
 
                 return pa;
             });

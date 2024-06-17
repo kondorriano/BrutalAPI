@@ -12,6 +12,11 @@ namespace BrutalAPI
             LoadedDBsHandler.GameOverDialogueDB.AddBossLinesData(bossID, lines);
         }
 
+        static public void AddCustom_GameOver_RandomLines(string[] lines)
+        {
+            LoadedDBsHandler.GameOverDialogueDB.AddRandomLinesData(lines);
+        }
+
 
         #region DialogueDB
         static public void AddCustom_DialogueProgram(string programID, YarnProgram data)

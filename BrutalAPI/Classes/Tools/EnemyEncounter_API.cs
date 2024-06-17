@@ -44,7 +44,7 @@ namespace BrutalAPI
             LoadedDBsHandler.EnemyDB.AddBundleToSpecialSelector(encounterID, zoneID, difficulty);
         }
     }
-    public class EnemyEncounter
+    public class EnemyEncounter_API
     {
         public BaseBundleGeneratorSO encounter;
         #region ENCOUNTER PROPERTIES
@@ -137,7 +137,7 @@ namespace BrutalAPI
         
         #endregion
 
-        public EnemyEncounter(EncounterType encounterType, string id_EB, string signID)
+        public EnemyEncounter_API(EncounterType encounterType, string id_EB, string signID)
         {
             if(encounterType == EncounterType.Random)
             {
