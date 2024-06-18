@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 using UnityEngine;
 
 namespace BrutalAPI
@@ -136,8 +137,8 @@ namespace BrutalAPI
         {
             set
             {
-                EnemyAbilityInfo[] eneAbs = new EnemyAbilityInfo[value.Length];
-                for (int i = 0; i < eneAbs.Length; i++)
+                List<EnemyAbilityInfo> eneAbs = new List<EnemyAbilityInfo>();
+                for (int i = 0; i < value.Length; i++)
                     eneAbs[i] = value[i].GenerateEnemyAbility(true);
                 enemy.abilities = eneAbs;
             }
@@ -234,7 +235,7 @@ namespace BrutalAPI
             //Initialize Lists here?
             enemy.unitTypes = new List<string>();
             enemy.passiveAbilities = new List<BasePassiveAbilitySO>();
-            enemy.abilities = new EnemyAbilityInfo[0];
+            enemy.abilities = new List<EnemyAbilityInfo>();
             enemy.enterEffects = new EffectInfo[0];
             enemy.exitEffects = new EffectInfo[0];
         }
@@ -242,8 +243,13 @@ namespace BrutalAPI
         public void PrepareEnemyPrefab(string prefabBundlePath, AssetBundle fileBundle)
         {
             GameObject asset = fileBundle.LoadAsset<GameObject>(prefabBundlePath);
-            EnemyInFieldLayout_Data data = asset.GetComponent<EnemyInFieldLayout_Data>();
             EnemyInFieldLayout layout = asset.AddComponent<EnemyInFieldLayout>();
+            EnemyInFieldLayout_Data data = asset.GetComponent<EnemyInFieldLayout_Data>();
+            if(data == null)
+            {
+                data = asset.AddComponent<EnemyInFieldLayout_Data>();
+                data.SetDefaultData();
+            }
             layout.m_Data = data;
             enemy.enemyTemplate = layout;
         }
@@ -267,6 +273,16 @@ namespace BrutalAPI
         {
             enemy.unitTypes.AddRange(unitTypes);
         }
+        public void AddEnemyAbilities(EnemyAbilityInfo[] abilities)
+        {
+            enemy.abilities.AddRange(abilities);
+        }
+        public void AddEnemyAbilities(Ability[] abilities)
+        {
+            for (int i = 0; i < abilities.Length; i++)
+                enemy.abilities.Add(abilities[i].GenerateEnemyAbility(true));
+        }
+
         public void AddEnemy(bool addToBronzoPool = false, bool addToSepulchrePool = false, bool addToSmallPool = false)
         {
             LoadedDBsHandler.EnemyDB.AddNewEnemy(enemy.name, enemy);
