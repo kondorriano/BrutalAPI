@@ -5,329 +5,436 @@ using System.Reflection;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using BepInEx.Logging;
+using HarmonyLib;
+using System.Text;
 
 namespace BrutalAPI
 {
+    [HarmonyPatch]
     public class DebugController : MonoBehaviour
     {
-        const BindingFlags AllFlags = (BindingFlags)(-1);
+        #region Static Data
         public static DebugController _instance;
-
-        bool showConsole = false;
-        string input;
-        string output;
-
-        int historyID;
-        List<string> history = new List<string>();
-
-        List<DebugCommand> commandList;
-        public static DebugCommand HELP;
-        public static DebugCommand GIVE;
-        public static DebugCommand ADDFOOL;
-        public static DebugCommand SPAWN;
-        public static DebugCommand DAMAGE;
-        public static DebugCommand HEAL;
-        public static DebugCommand LEVELUP;
-        public static DebugCommand MONEY;
-        public static DebugCommand TP;
-        public static DebugCommand ENDCOMBAT;
-        public static DebugCommand PIGMENT;
+        public static ManualLogSource ConsoleLogger = BepInEx.Logging.Logger.CreateLogSource("BrutalAPI Console");
 
         public static DebugController Instance
         {
             get
             {
-                if (DebugController._instance == null)
-                {
-                    Debug.Log("WHAT");
-                    DebugController._instance = new GameObject("DebugController").AddComponent<DebugController>();
-                }
-                return DebugController._instance;
+                if (_instance == null)
+                    _instance = new GameObject("DebugController").AddComponent<DebugController>();
+
+                return _instance;
+
             }
         }
+        #endregion
 
-        public void Awake()
+        #region Private Data
+        private bool showConsole;
+        private string output;
+
+        private string input;
+        private Vector2 scroll;
+
+        private readonly List<string> autocompleteOptions = [];
+        private string argInfo = "";
+
+        private int historyID;
+        private readonly List<string> history = [];
+        #endregion
+
+        #region Commands
+        public static readonly DebugCommandGroup Commands = new(string.Empty, string.Empty);
+
+        public static readonly DebugCommand HELP;
+        public static readonly DebugCommand GIVE;
+        public static readonly DebugCommand ADDFOOL;
+        public static readonly DebugCommand SPAWN;
+        public static readonly DebugCommand DAMAGE;
+        public static readonly DebugCommand HEAL;
+        public static readonly DebugCommand LEVELUP;
+        public static readonly DebugCommand MONEY;
+        public static readonly DebugCommand TP;
+        public static readonly DebugCommand ENDCOMBAT;
+        public static readonly DebugCommand PIGMENT;
+        public static readonly DebugCommand SKIP;
+        #endregion
+
+        #region Autocomplete
+        public static readonly AutocompletionGroup ItemAutocomplete = new(LoadItemIds);
+        public static readonly AutocompletionGroup CharacterAutocomplete = new(() => LoadedDBsHandler.CharacterDB._charactersList);
+        public static readonly AutocompletionGroup EnemyAutocomplete = new(() => LoadedDBsHandler.EnemyDB._enemiesList);
+        public static readonly AutocompletionGroup PigmentAutocomplete = new(() => LoadedDBsHandler.PigmentDB._PigmentPool.Keys);
+        #endregion
+
+        #region Log Colors
+        public static readonly Color MessageColor = Color.white;
+        public static readonly Color ErrorColor = Color.red;
+        public static readonly Color FatalColor = new(0.5f, 0f, 0f);
+        public static readonly Color WarningColor = Color.yellow;
+        public static readonly Color InfoColor = Color.grey;
+        public static readonly Color DebugColor = Color.grey;
+        #endregion
+
+        #region Misc Setup
+        static DebugController()
         {
-            _instance = this;
-            DontDestroyOnLoad(gameObject);
-            
-            IDetour OpenConsoleHook = new Hook(
-                    typeof(Keyboard).GetMethod("OnTextInput", AllFlags),
-                    typeof(DebugController).GetMethod("KeyPressed", AllFlags));
-
-            GameInformationHolder info = LoadedDBsHandler.InfoHolder;
-
             //Help command
-            HELP = new DebugCommand("help", "Shows available commands and information about them.", "help (command)", (string[] parameters) =>
+            HELP = new("help", "Shows available commands and information about them.", new()
             {
-                if (parameters == null || parameters.Length != 1)
+                new StringCommandArgument("command", optional: true)
+            },
+            args =>
+            {
+                if (args[0].TryRead<string>(out var c) && !string.IsNullOrEmpty(c))
                 {
-                    string commands = "";
-                    for (int i = 0; i < commandList.Count; i++)
-                    {
-                        if (i == commandList.Count - 1)
-                            commands += commandList[i].commandId;
-                        else
-                            commands += commandList[i].commandId + ", ";
-                    }
+                    var cmd = string.Join(" ", args.Select(x => x.Read<string>() ?? ""));
 
-                    WriteLine("Available commands: " + commands);
-                    return;
-                }
-                else if (parameters != null && parameters.Length == 1)
-                {
-                    for (int i = 0; i < commandList.Count; i++)
-                    {
-                        if (commandList[i].commandId == parameters[0])
-                        {
-                            WriteLine(commandList[i].commandDescription + " Usage: " + commandList[i].commandFormat);
-                            return;
-                        }
-                    }
-                    WriteLine("Unknown command");
+                    if (Instance.TryReadCommand(cmd, out var command, out _, out var fullName))
+                        Instance.WriteLine(command.FormatCommand(fullName));
+
+                    else
+                        Instance.WriteLine($"Unknown command \"{cmd}\".", LogLevel.Error);
+
                     return;
                 }
                 else
-                { WriteLine("Syntax error: " + HELP.commandFormat); return; }
-            });
+                {
+                    static void RecurseCommands(DebugCommandGroup group, string hierarchy)
+                    {
+                        if (!string.IsNullOrEmpty(group.name))
+                            Instance.WriteLine(group.FormatCommand(hierarchy));
+
+                        foreach (var cmd in group.children)
+                            RecurseCommands(cmd, string.IsNullOrEmpty(hierarchy) ? cmd.name : $"{hierarchy} {cmd.name}");
+                    }
+
+                    RecurseCommands(Commands, "");
+                }
+            }, true);
 
             //Give command
-            GIVE = new DebugCommand("give", "Adds an item to your inventory.", "give <item_id>", (string[] parameters) =>
+            GIVE = new("give", "Adds an item to your inventory.", new()
             {
-                if (parameters == null || parameters.Length != 1)
-                { WriteLine("Syntax error: " + GIVE.commandFormat); return; }
+                new StringCommandArgument("item", ItemAutocomplete)
+            },
+            args =>
+            {
+                var itmName = args[0].Read<string>();
 
-                if (!LoadedAssetsHandler.LoadedWearables.ContainsKey(parameters[0]))
-                { WriteLine("Unknown Item"); return; }
+                if (itmName == null)
+                    return;
 
-                info.Run.playerData.AddNewItem(LoadedAssetsHandler.GetWearable(parameters[0]));
-                { WriteLine("Added item " + parameters[0] + " to your inventory"); return; }
+                var itm = LoadedAssetsHandler.GetWearable(itmName);
+
+                if (itm == null)
+                {
+                    Instance.WriteLine($"Unknown item \"{itmName}\".", LogLevel.Error);
+
+                    return;
+                }
+
+                var run = LoadedDBsHandler.InfoHolder.Run;
+
+                if (run == null)
+                {
+                    Instance.WriteLine("No active run.", LogLevel.Error);
+
+                    return;
+                }
+
+                run.playerData.AddNewItem(itm);
+
+                Instance.WriteLine($"Added item {itmName} to inventory.");
             });
 
             //AddFool command
-            ADDFOOL = new DebugCommand("addfool", "Adds a fool to your party.", "addfool <fool_id> <rank> <abilityOne> <abilityTwo>", (string[] parameters) =>
+            ADDFOOL = new("addfool", "Adds a fool to your party.", new()
             {
-                if (parameters == null || parameters.Length != 4)
-                { WriteLine("Syntax error: " + ADDFOOL.commandFormat); return; }
+                new StringCommandArgument("fool", CharacterAutocomplete),
+                new NumericalCommandArgument("rank", 0, optional: true),
+                new NumericalCommandArgument("abilityOne", optional: true),
+                new NumericalCommandArgument("abilityTwo", optional: true)
+            },
+            args =>
+            {
+                var foolName = args[0].Read<string>();
 
-                if (!LoadedAssetsHandler.LoadedCharacters.ContainsKey(parameters[0]))
-                { WriteLine("Unknown Character"); return; }
+                if (foolName == null)
+                    return;
 
-                int rank;
-                int ability1;
-                int ability2;
+                var fool = LoadedAssetsHandler.GetCharacter(foolName);
 
-                if (!int.TryParse(parameters[1], out rank))
-                { WriteLine("Rank is not a number"); return; }
+                if (fool == null)
+                {
+                    Instance.WriteLine($"Unknown character \"{foolName}\".", LogLevel.Error);
 
-                if (!int.TryParse(parameters[2], out ability1))
-                { WriteLine("Ability 1 is not a number"); return; }
+                    return;
+                }
 
-                if (!int.TryParse(parameters[3], out ability2))
-                { WriteLine("Ability 2 is not a number"); return; }
+                var run = LoadedDBsHandler.InfoHolder.Run;
 
-                if (rank > 3)
-                { WriteLine("A party member can't have a rank above 3"); return; }
+                if (run == null)
+                {
+                    Instance.WriteLine("No active run.", LogLevel.Error);
 
-                info.Run.playerData.AddNewCharacter(LoadedAssetsHandler.GetCharacter(parameters[0]), rank, new int[] { ability1, ability2 });
-                { WriteLine("Added fool " + parameters[0] + " to your party"); return; }
+                    return;
+                }
+
+                if (!args[1].TryRead(out int rank))
+                    rank = 0;
+
+                int? abilityOne = null;
+                int? abilityTwo = null;
+
+                if (args[2].TryRead(out int abOne))
+                    abilityOne = abOne;
+                if (args[3].TryRead(out int abTwo))
+                    abilityTwo = abTwo;
+
+                if (abilityOne == null && abilityTwo == null)
+                {
+                    var abs = fool.GenerateAbilities();
+
+                    abilityOne = abs[0];
+                    abilityTwo = abs[1];
+                }
+
+                else if (abilityOne == null)
+                    abilityOne = abilityTwo switch
+                    {
+                        0 => UnityEngine.Random.Range(1, 3),
+                        1 => UnityEngine.Random.Range(0, 2) * 2,
+                        2 => UnityEngine.Random.Range(0, 2),
+
+                        _ => UnityEngine.Random.Range(0, 3)
+                    };
+
+                else if (abilityTwo == null)
+                    abilityTwo = abilityOne switch
+                    {
+                        0 => UnityEngine.Random.Range(1, 3),
+                        1 => UnityEngine.Random.Range(0, 2) * 2,
+                        2 => UnityEngine.Random.Range(0, 2),
+
+                        _ => UnityEngine.Random.Range(0, 3)
+                    };
+
+                run.playerData.AddNewCharacter(fool, rank, new int[] { abilityOne.GetValueOrDefault(), abilityTwo.GetValueOrDefault() });
+
+                Instance.WriteLine($"Added fool {foolName} to party.");
             });
 
             //Spawn command
-            SPAWN = new DebugCommand("spawn", "Spawns an enemy in battle.", "spawn <enemy_id> <slot>", (string[] parameters) =>
+            SPAWN = new("spawn", "Spawns an enemy in battle.", new()
             {
-                if (parameters == null || parameters.Length != 2)
-                { WriteLine("Syntax error: " + SPAWN.commandFormat); return; }
+                new StringCommandArgument("enemy", EnemyAutocomplete),
+                new NumericalCommandArgument("slot", 0, optional: true)
+            },
+            args =>
+            {
+                var enemyName = args[0].Read<string>();
 
-                int slot;
-                string enemyid = parameters[0];
+                if (enemyName == null)
+                    return;
 
-                if (Resources.Load(Tools.PathUtils.enemiesResPath + "/" + enemyid) as EnemySO == null &&
-                !LoadedAssetsHandler.LoadedEnemies.ContainsKey(enemyid))
-                { WriteLine("Unknown Enemy"); return; }
+                var enemy = LoadedAssetsHandler.GetEnemy(enemyName);
 
-                if (!int.TryParse(parameters[1], out slot))
-                { WriteLine("Slot is not a number"); return; }
+                if (enemy == null)
+                {
+                    Instance.WriteLine($"Unknown enemy \"{enemyName}\"", LogLevel.Error);
 
-                if (!CombatManager.Instance._combatInitialized)
-                { WriteLine("Can't spawn an enemy when out of combat"); return; }
+                    return;
+                }
 
-                CombatManager.Instance.AddPriorityRootAction(new SpawnEnemyAction(LoadedAssetsHandler.GetEnemy(enemyid), slot, true, true, CombatType_GameIDs.Spawn_Basic.ToString()));
-                { WriteLine("Spawned enemy " + parameters[0] + " in slot " + slot.ToString()); return; }
+                if (!args[1].TryRead(out int slot))
+                    slot = -1;
+
+                CombatManager.Instance.AddPriorityRootAction(new SpawnEnemyAction(enemy, slot, true, false, CombatType_GameIDs.Spawn_Basic.ToString()));
+
+                Instance.WriteLine($"Spawned enemy {enemyName} in slot {slot}.");
             });
 
             //Damage command
-            DAMAGE = new DebugCommand("damage", "Damages an enemy or fool.", "damage <damage> <slot> <targetsAllies>", (string[] parameters) =>
+            DAMAGE = new("damage", "Damages an enemy or fool.", new()
             {
-                if (parameters == null || parameters.Length != 3)
-                { WriteLine("Syntax error: " + DAMAGE.commandFormat); return; }
+                new NumericalCommandArgument("damage"),
+                new NumericalCommandArgument("slot", 0),
+                new BoolCommandArgumnt("damageCharacters")
+            },
+            args =>
+            {
+                var dmg = args[0].Read<int>();
+                var slot = args[1].Read<int>();
+                var characters = args[2].Read<bool>();
 
-                int slot;
-                int damage;
-                bool targetAllies;
+                var dmgEffect = Effects.GenerateEffect(ScriptableObject.CreateInstance<DamageEffect>(), dmg, Targeting.GenerateGenericTarget([slot], characters));
 
-                if (!int.TryParse(parameters[0], out damage))
-                { WriteLine("Damage is not a number"); return; }
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction([dmgEffect], CombatManager.Instance._stats.CharactersOnField.First().Value));
 
-                if (!int.TryParse(parameters[1], out slot))
-                { WriteLine("Slot is not a number"); return; }
-
-                if (!bool.TryParse(parameters[2], out targetAllies))
-                { WriteLine("TargetsAllies is not true or false"); return; }
-
-                if (!CombatManager.Instance._combatInitialized)
-                { WriteLine("Can't damage when out of combat"); return; }
-
-                GenericTargetting_BySlot_Index target = ScriptableObject.CreateInstance<GenericTargetting_BySlot_Index>();
-                target.slotPointerDirections = new int[1] { slot };
-                target.getAllies = targetAllies;
-
-                EffectInfo killdmg = Effects.GenerateEffect(ScriptableObject.CreateInstance<DamageEffect>(),
-                    damage, target);
-
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { killdmg },
-                    CombatManager.Instance._stats.CharactersOnField.First().Value));
-
-                { WriteLine("Damaged entity in slot " + slot.ToString() + " for " + damage.ToString() + " damage"); return; }
+                Instance.WriteLine($"Damaged {(characters ? "character" : "enemy")} in slot {slot} for {dmg} damage.");
             });
 
             //Heal command
-            HEAL = new DebugCommand("heal", "Heals an enemy or fool.", "heal <amount> <slot> <targetsAllies>", (string[] parameters) =>
+            HEAL = new("heal", "Heals an enemy or fool.", new()
             {
-                if (parameters == null || parameters.Length != 3)
-                { WriteLine("Syntax error: " + HEAL.commandFormat); return; }
+                new NumericalCommandArgument("healing"),
+                new NumericalCommandArgument("slot", 0),
+                new BoolCommandArgumnt("healCharacters")
+            },
+            args =>
+            {
+                var heal = args[0].Read<int>();
+                var slot = args[1].Read<int>();
+                var characters = args[2].Read<bool>();
 
-                int slot;
-                int amount;
-                bool targetAllies;
+                var healEffect = Effects.GenerateEffect(ScriptableObject.CreateInstance<HealEffect>(), heal, Targeting.GenerateGenericTarget([slot], characters));
 
-                if (!int.TryParse(parameters[0], out amount))
-                { WriteLine("Amount is not a number"); return; }
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction([healEffect], CombatManager.Instance._stats.CharactersOnField.First().Value));
 
-                if (!int.TryParse(parameters[1], out slot))
-                { WriteLine("Slot is not a number"); return; }
-
-                if (!bool.TryParse(parameters[2], out targetAllies))
-                { WriteLine("TargetsAllies is not true or false"); return; }
-
-                if (!CombatManager.Instance._combatInitialized)
-                { WriteLine("Can't heal when out of combat"); return; }
-
-                GenericTargetting_BySlot_Index target = ScriptableObject.CreateInstance<GenericTargetting_BySlot_Index>();
-                target.slotPointerDirections = new int[1] { slot };
-                target.getAllies = targetAllies;
-
-                EffectInfo heal = Effects.GenerateEffect(ScriptableObject.CreateInstance<HealEffect>(), amount, target);
-
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { heal },
-                    CombatManager.Instance._stats.CharactersOnField.First().Value));
-
-                { WriteLine("Healed entity in slot " + slot.ToString() + " for " + amount.ToString() + " HP"); return; }
+                Instance.WriteLine($"Healed {(characters ? "character" : "enemy")} in slot {slot} for {heal} health.");
             });
 
             //Level up command
-            LEVELUP = new DebugCommand("lvlup", "Changes the level of a fool.", "lvlup <partySlot>", (string[] parameters) =>
+            LEVELUP = new("lvlup", "Changes the level of a fool.", new()
             {
-                if (parameters == null || parameters.Length != 1)
-                { WriteLine("Syntax error: " + LEVELUP.commandFormat); return; }
+                new NumericalCommandArgument("partySlot", 0)
+            },
+            args =>
+            {
+                var slot = args[0].Read<int>();
 
-                int slot;
+                LoadedDBsHandler.InfoHolder.Run.playerData.RankUpCharacter(slot, 0);
+                var character = LoadedDBsHandler.InfoHolder.Run.playerData.GetCharacterFromPartySlot(slot);
 
-                if (!int.TryParse(parameters[0], out slot))
-                { WriteLine("Slot is not a number"); return; }
-
-                info.Run.playerData.RankUpCharacter(slot, 0);
-                IMinimalCharacterInfo character = info.Run.playerData.GetCharacterFromPartySlot(slot);
-
-                { WriteLine("Leveled up " + character.Character._characterName); return; }
+                Instance.WriteLine($"Leveled up {character.Character._characterName}.");
             });
 
             //Money command
-            MONEY = new DebugCommand("money", "Adds coins.", "money <amount>", (string[] parameters) =>
+            MONEY = new("money", "Adds coins.", new()
             {
-                if (parameters == null || parameters.Length != 1)
-                { WriteLine("Syntax error: " + MONEY.commandFormat); return; }
+                new NumericalCommandArgument("amount")
+            },
+            args =>
+            {
+                var amount = args[0].Read<int>();
 
-                int amount;
+                LoadedDBsHandler.InfoHolder.Run.playerData.AddCurrency(amount);
 
-                if (!int.TryParse(parameters[0], out amount))
-                { WriteLine("Money is not a number"); return; }
-
-                info.Run.playerData.AddCurrency(amount);
-
-                { WriteLine("Added " + amount.ToString() + " coins"); return; }
+                Instance.WriteLine($"Added {amount} coins.");
             });
 
             //Teleport command
-            TP = new DebugCommand("tp", "Teleports you to an area.", "tp <areaID> <restartArea>", (string[] parameters) =>
+            TP = new("tp", "Teleports you to an area.", new()
             {
-                if (parameters == null || parameters.Length != 2)
-                { WriteLine("Syntax error: " + TP.commandFormat); return; }
+                new NumericalCommandArgument("areaIndex", 0),
+                new BoolCommandArgumnt("restartArea", true)
+            },
+            args =>
+            {
+                var area = args[0].Read<int>();
+                var restart = args[1].Read<bool>();
 
-                int ID;
-                bool reset;
+                var notif = new ZoneChangeNtf(area, restart);
+                Tools.NtfUtils.notifications.PostNotification(Tools.Utils.changeSpecificZoneNtf, Instance, notif);
 
-                if (!int.TryParse(parameters[0], out ID))
-                { WriteLine("Area ID is not a number"); return; }
-
-                if (!bool.TryParse(parameters[1], out reset))
-                { WriteLine("Restart Area is not true or false"); return; }
-
-                ZoneChangeNtf data = new ZoneChangeNtf(ID, reset);
-                Tools.NtfUtils.notifications.PostNotification(Tools.Utils.changeSpecificZoneNtf, this, data);
-
-                { WriteLine("Teleported to " + info.Run.CurrentZoneDB.ZoneName); return; }
+                Instance.WriteLine($"Teleported to {LoadedDBsHandler.InfoHolder.Run.CurrentZoneDB.ZoneName}.");
             });
 
             //ENDCOMBAT
-            ENDCOMBAT = new DebugCommand("endcombat", "Instantly ends the current combat.", "endcombat", (string[] parameters) =>
+            ENDCOMBAT = new("endcombat", "Instantly ends the current combat.", [], args =>
             {
-                if (parameters.Length < 0)
-                { WriteLine("Syntax error: " + ENDCOMBAT.commandFormat); return; }
-
-                var firstChar = CombatManager.Instance._stats.CharactersOnField.First().Value;
-                CombatEndEffect combatEndEffect = ScriptableObject.CreateInstance<CombatEndEffect>();
+                var combatEndEffect = ScriptableObject.CreateInstance<CombatEndEffect>();
                 combatEndEffect._ignoreLoot = false;
 
                 EffectInfo effect = Effects.GenerateEffect(combatEndEffect);
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { effect }, firstChar));
-                WriteLine("Ended combat"); return;
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { effect }, CombatManager.Instance._stats.CharactersOnField.First().Value));
+
+                Instance.WriteLine("Ended combat.");
             });
 
             //PIGMENT
-            PIGMENT = new DebugCommand("genpigment", "Generates the input pigment.", "genpigment <pigmentID> <pigmentID> <pigmentID>...", (string[] parameters) =>
+            PIGMENT = new("genpigment", "Generates the input pigment.", new()
             {
-                if (!CombatManager.Instance._combatInitialized)
-                { WriteLine("Can't generate pigment when out of combat"); return; }
+                new StringCommandArgument("pigment", PigmentAutocomplete, true)
+            },
+            args =>
+            {
+                var effects = new List<EffectInfo>();
 
-                if (parameters == null || parameters.Length == 0)
-                { WriteLine("Syntax error: " + PIGMENT.commandFormat); return; }
-
-                EffectInfo[] manaEffects = new EffectInfo[parameters.Length];
-                
-                var firstChar = CombatManager.Instance._stats.CharactersOnField.First().Value;
-
-                for (int i = 0; i < parameters.Length; i++)
+                foreach (var arg in args)
                 {
-                    GenerateColorManaEffect colorManaEffect = ScriptableObject.CreateInstance<GenerateColorManaEffect>();
+                    if (!arg.TryRead(out string pigmentId) || string.IsNullOrEmpty(pigmentId))
+                        continue;
 
-                    ManaColorSO manaColor = LoadedDBsHandler.PigmentDB.GetPigment(parameters[i]);
-                    if (manaColor == null || manaColor.Equals(null))
-                    { WriteLine("ID is not a valid pigment ID"); return; }
+                    var pigment = LoadedDBsHandler.PigmentDB.GetPigment(pigmentId);
 
-                    colorManaEffect.mana = manaColor;
-                    
-                    manaEffects[i] = Effects.GenerateEffect(colorManaEffect, 1);
+                    if (pigment == null)
+                    {
+                        Instance.WriteLine($"Invalid pigment \"{pigmentId}\".", LogLevel.Error);
+
+                        continue;
+                    }
+
+                    var colorManaEffect = ScriptableObject.CreateInstance<GenerateColorManaEffect>();
+                    colorManaEffect.mana = pigment;
+
+                    effects.Add(Effects.GenerateEffect(colorManaEffect, 1));
                 }
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(manaEffects, firstChar));
+                CombatManager.Instance.AddPriorityRootAction(new EffectAction([.. effects], CombatManager.Instance._stats.CharactersOnField.First().Value));
+            }, true);
 
-                WriteLine("Generated " + parameters.Length + " pigment"); return;
+            SKIP = new("skip", "Skips the current enemy room", [], args =>
+            {
+                var run = LoadedDBsHandler.InfoHolder.Run;
+
+                if (run == null)
+                {
+                    Instance.WriteLine("No active run.", LogLevel.Error);
+
+                    return;
+                }
+
+                var zone = run.ZoneData[run.CurrentZoneID];
+
+                if (zone == null)
+                {
+                    Instance.WriteLine("No active zone.", LogLevel.Error);
+
+                    return;
+                }
+
+                var card = zone.GetCard(run.CurrentCardID);
+
+                if (card == null)
+                {
+                    Instance.WriteLine("No active room.", LogLevel.Error);
+
+                    return;
+                }
+
+                if(card.CardType == CardType.Boss)
+                {
+                    Instance.WriteLine("Can't skip boss rooms.", LogLevel.Error);
+
+                    return;
+                }
+
+                card.HasBeenSolved = true;
+
+                var ui = FindObjectOfType<OverworldUIHandler>();
+
+                if (ui != null)
+                    ui.SetPileButtonState(true);
+
+                Instance.WriteLine("Skipping current room.");
             });
 
-
-            commandList = new List<DebugCommand>
+            Commands.children.AddRange(new List<DebugCommandGroup>
             {
                 HELP,
                 GIVE,
@@ -339,16 +446,74 @@ namespace BrutalAPI
                 MONEY,
                 TP,
                 ENDCOMBAT,
-                PIGMENT
-            };
-
-            Debug.Log("Debug Console Ready");
+                PIGMENT,
+                SKIP
+            });
         }
 
-        public void Update()
+        private static IEnumerable<string> LoadItemIds()
         {
-            if (Keyboard.current.enterKey.wasPressedThisFrame)
-                HandleInput();
+            var processed = new List<string>();
+            var unlocks = LoadedDBsHandler.ItemUnlocksDB;
+
+            foreach (var i in unlocks.ShopItems)
+            {
+                if (!processed.Contains(i.itemName.ToLowerInvariant()))
+                {
+                    processed.Add(i.itemName.ToLowerInvariant());
+
+                    yield return i.itemName;
+                }
+            }
+
+            foreach (var i in unlocks.TreasureItems)
+            {
+                if (!processed.Contains(i.itemName.ToLowerInvariant()))
+                {
+                    processed.Add(i.itemName.ToLowerInvariant());
+
+                    yield return i.itemName;
+                }
+            }
+
+            foreach (var i in unlocks.ExtraItems)
+            {
+                if (!processed.Contains(i.itemName.ToLowerInvariant()))
+                {
+                    processed.Add(i.itemName.ToLowerInvariant());
+
+                    yield return i.itemName;
+                }
+            }
+
+            foreach (var kvp in LoadedAssetsHandler.LoadedWearables)
+            {
+                if (kvp.Value != null && !processed.Contains(kvp.Key.ToLowerInvariant()))
+                {
+                    processed.Add(kvp.Key.ToLowerInvariant());
+
+                    yield return kvp.Key;
+                }
+            }
+        }
+
+        private void Awake()
+        {
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        private void Update()
+        {
+            if (!showConsole)
+                return;
+
+            if (Keyboard.current.enterKey.wasPressedThisFrame && !string.IsNullOrEmpty(input))
+            {
+                TryExecuteCommand(input);
+
+                ClearInput();
+            }
 
             if (Keyboard.current.upArrowKey.wasPressedThisFrame && history.Count > 0)
             {
@@ -364,51 +529,219 @@ namespace BrutalAPI
                 historyID = Mathf.Clamp(historyID, 0, history.Count - 1);
             }
         }
-        public static void KeyPressed(Action<Keyboard, char> orig, Keyboard self, char c)
-        {
-            orig(self, c);
+        #endregion
 
-            if (c == BrutalAPI.OpenDebugConsoleKey[0])
-                DebugController.Instance.showConsole = !DebugController.Instance.showConsole;
+        #region Command and Log Methods
+        public void TryExecuteCommand(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return;
+
+            if (!TryReadCommand(input, out var cmd, out var eInfo, out _))
+            {
+                WriteLine($"Unknown command \"{input}\".", LogLevel.Error);
+
+                return;
+            }
+
+            cmd.Invoke(eInfo);
+            history.Add(input);
+            historyID = history.Count - 1;
         }
 
-        public void OnGUI()
+        public bool TryReadCommand(string input, out DebugCommandGroup command, out string extraInfo, out string fullCommandName)
         {
-            if (!showConsole) return;
+            if (string.IsNullOrEmpty(input))
+            {
+                command = null;
+                fullCommandName = string.Empty;
+                extraInfo = string.Empty;
+
+                return false;
+            }
+
+            var args = input.Split([' '], StringSplitOptions.RemoveEmptyEntries).ToList();
+            var hierarchy = new List<string>();
+            command = Commands;
+
+            while (args.Count > 0 && command != null && command.children != null && command.children.Count > 0)
+            {
+                var ch = command.children.FirstOrDefault(x => x != null && x.name == args[0]);
+
+                if (ch == null)
+                    break;
+
+                command = ch;
+                hierarchy.Add(command.name);
+                args.RemoveAt(0);
+            }
+
+            fullCommandName = string.Join(" ", hierarchy);
+            extraInfo = string.Join(" ", args);
+
+            return command != Commands;
+        }
+
+        public void WriteLine(string s, LogLevel logLevel = LogLevel.Message)
+        {
+            var col = logLevel switch
+            {
+                LogLevel.Fatal => FatalColor,
+                LogLevel.Error => ErrorColor,
+                LogLevel.Warning => WarningColor,
+                LogLevel.Message => MessageColor,
+                LogLevel.Info => InfoColor,
+                LogLevel.Debug => DebugColor,
+
+                _ => Color.white
+            };
+
+            output += "\n" + $"<color=#{ColorUtility.ToHtmlStringRGB(col)}>{s}</color>";
+
+            ConsoleLogger.Log(logLevel, s);
+        }
+
+        public void ClearInput()
+        {
+            ClearTempData();
+            input = "";
+        }
+
+        private void ClearTempData()
+        {
+            autocompleteOptions.Clear();
+            argInfo = "";
+        }
+        #endregion
+
+        #region GUI
+        private void OnGUI()
+        {
+            if (!showConsole)
+                return;
+
+            GUI.skin.textArea.richText = true;
+
+            var ySpaceOffset = 0f;
 
             GUI.Box(new Rect(0, 0, Screen.width, 110), "");
             GUI.Box(new Rect(0, 110, Screen.width, 30), "");
 
+            var oldInput = input;
             input = GUI.TextField(new Rect(10f, 115f, Screen.width - 20f, 20f), input);
+
+            AddAutocompleteScrollView(ref ySpaceOffset);
+
+            if (input != oldInput || (Keyboard.current != null && Keyboard.current.ctrlKey.wasPressedThisFrame))
+                ProcessInputChange();
+
+            if (!string.IsNullOrEmpty(argInfo))
+                GUI.TextArea(new Rect(10f, 135f + ySpaceOffset, Screen.width - 20f, 105f), argInfo);
+
             GUI.TextArea(new Rect(10f, 5f, Screen.width - 20f, 105f), output);
         }
 
-        public void HandleInput()
+        private void AddAutocompleteScrollView(ref float ySpaceOffset)
         {
-            history.Add(input);
-            historyID = history.Count - 1;
+            var buttonHeight = 20f;
+            var numButtonsInScroll = 10;
 
-            string[] commandstr = input.Split(' ');
-            string[] parameters = commandstr.Skip(1).ToArray();
+            var scrollYSpace = 0f;
 
-            for (int i = 0; i < commandList.Count; i++)
+            scroll = GUI.BeginScrollView(new(10f, 140f, Screen.width - 20f, buttonHeight * numButtonsInScroll), scroll, new(0f, 0f, Screen.width - 45f, buttonHeight * autocompleteOptions.Count));
+
+            for (int i = 0; i < autocompleteOptions.Count; i++)
             {
-                if (commandstr[0] == commandList[i].commandId)
+                var opt = autocompleteOptions[i];
+                scrollYSpace += buttonHeight;
+
+                if (GUI.Button(new(0f, buttonHeight * i, Screen.width - 25f, buttonHeight), opt))
                 {
-                    commandList[i].Invoke(parameters);
-                    goto ExecutedCommand;
+                    input = AutocompleteInput(input, opt);
+
+                    MoveCursorToInputEnd();
                 }
             }
-            WriteLine("Unknown command");
 
-        ExecutedCommand:
-            input = "";
+            scrollYSpace = Mathf.Min(scrollYSpace, buttonHeight * numButtonsInScroll);
+            scrollYSpace += autocompleteOptions.Count > 0 ? 10f : 5f;
+
+            ySpaceOffset += scrollYSpace;
+
+            GUI.EndScrollView();
         }
 
-        public void WriteLine(string s)
+        private void ProcessInputChange()
         {
-            output += "\n" + s;
-        }
-    }
+            ClearTempData();
 
+            if (!string.IsNullOrEmpty(input) || (Keyboard.current != null && Keyboard.current.ctrlKey.wasPressedThisFrame))
+            {
+                if (TryReadCommand(input, out var cmd, out var extraInfo, out var fullname))
+                {
+                    var args = extraInfo.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+
+                    if (input.EndsWith(" "))
+                        args = [.. args, ""];
+
+                    if (args.Length <= 0)
+                        return;
+
+                    if (args.Length == 1)
+                    {
+                        autocompleteOptions.AddRange(cmd.AutocompleteChildren(args[0]));
+                    }
+
+                    var builder = new StringBuilder();
+
+                    builder.AppendLine($"{fullname}: {cmd.description}");
+                    builder.AppendLine();
+
+                    cmd.ProcessAutocompletion(autocompleteOptions, args);
+                    cmd.AddArgumentInfo(builder, args);
+
+                    argInfo = builder.ToString();
+                }
+                else
+                {
+                    autocompleteOptions.AddRange(Commands.AutocompleteChildren(input));
+                }
+            }
+        }
+
+        private void MoveCursorToInputEnd()
+        {
+            TextEditor editor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
+
+            editor.text = input;
+            editor.cursorIndex = input.Length + 1;
+            editor.selectIndex = input.Length + 1;
+        }
+
+        public static string AutocompleteInput(string input, string autocomplete)
+        {
+            if (string.IsNullOrEmpty(input))
+                return $"{autocomplete} ";
+
+            var split = input.Split([' '], StringSplitOptions.RemoveEmptyEntries);
+
+            if (input.EndsWith(" "))
+                split = [.. split, ""];
+
+            split[split.Length - 1] = autocomplete;
+
+            return $"{string.Join(" ", split)} ";
+        }
+        #endregion
+
+        #region Patches
+        [HarmonyPatch(typeof(Keyboard), nameof(Keyboard.OnTextInput))]
+        [HarmonyPostfix]
+        private static void ToggleConsole(char character)
+        {
+            if (character == BrutalAPI.OpenDebugConsoleKey[0])
+                Instance.showConsole = !Instance.showConsole;
+        }
+        #endregion
+    }
 }

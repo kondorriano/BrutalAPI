@@ -45,11 +45,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\References\BrutalOrchestra\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>..\..\References\Bepinex\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="Marosi.SerializableCollections">
       <HintPath>..\..\References\Unity\Marosi.SerializableCollections.dll</HintPath>
