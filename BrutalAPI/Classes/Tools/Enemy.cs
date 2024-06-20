@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -134,13 +135,7 @@ namespace BrutalAPI
         #region ABILITIES
         public Ability[] Abilities
         {
-            set
-            {
-                EnemyAbilityInfo[] eneAbs = new EnemyAbilityInfo[value.Length];
-                for (int i = 0; i < eneAbs.Length; i++)
-                    eneAbs[i] = value[i].GenerateEnemyAbility(true);
-                enemy.abilities = eneAbs;
-            }
+            set => enemy.abilities = value.Select(x => x.GenerateEnemyAbility(true)).ToList();
         }
         public BaseAbilitySelectorSO AbilitySelector
         {
@@ -234,7 +229,7 @@ namespace BrutalAPI
             //Initialize Lists here?
             enemy.unitTypes = new List<string>();
             enemy.passiveAbilities = new List<BasePassiveAbilitySO>();
-            enemy.abilities = new EnemyAbilityInfo[0];
+            enemy.abilities = new List<EnemyAbilityInfo>();
             enemy.enterEffects = new EffectInfo[0];
             enemy.exitEffects = new EffectInfo[0];
         }
