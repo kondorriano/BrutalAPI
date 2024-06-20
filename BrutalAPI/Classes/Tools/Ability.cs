@@ -139,6 +139,15 @@ namespace BrutalAPI
         public RaritySO Rarity { get; set; }
         #endregion
 
+        #region ABILITY GENERATION PROPERTIES
+        bool _AddedAbilityToCharDB = false;
+        bool _CharAbilityGenerated = false;
+        CharacterAbility _CharAbility = null;
+        bool _AddedAbilityToEnemDB = false;
+        bool _EnemAbilityGenerated = false;
+        EnemyAbilityInfo _EnemAbility;
+        #endregion
+
         public void AddIntentsToTarget(BaseCombatTargettingSO targets, string[] intents)
         {
             IntentTargetInfo info = new IntentTargetInfo();
@@ -185,23 +194,37 @@ namespace BrutalAPI
 
         public CharacterAbility GenerateCharacterAbility(bool addToDB = false)
         {
-            if (addToDB)
+            if (addToDB && !_AddedAbilityToCharDB)
+            {
                 LoadedDBsHandler.AbilityDB.AddNewCharacterAbility(ability.name, ability);
+                _AddedAbilityToCharDB = true;
+            }
 
-            CharacterAbility ab = new CharacterAbility();
-            ab.ability = ability;
-            ab.cost = Cost;
-            return ab;
+            if (_CharAbilityGenerated)
+                return _CharAbility;
+
+            _CharAbilityGenerated = true;
+            _CharAbility = new CharacterAbility();
+            _CharAbility.ability = ability;
+            _CharAbility.cost = Cost;
+            return _CharAbility;
         }
         public EnemyAbilityInfo GenerateEnemyAbility(bool addToDB = false)
         {
-            if (addToDB)
+            if (addToDB && !_AddedAbilityToEnemDB)
+            {
                 LoadedDBsHandler.AbilityDB.AddNewEnemyAbility(ability.name, ability);
+                _AddedAbilityToEnemDB = true;
+            }
             
-            EnemyAbilityInfo ab = new EnemyAbilityInfo();
-            ab.ability = ability;
-            ab.rarity = Rarity;
-            return ab;
+            if(_EnemAbilityGenerated)
+                return _EnemAbility;
+
+            _EnemAbilityGenerated = true;
+            _EnemAbility = new EnemyAbilityInfo();
+            _EnemAbility.ability = ability;
+            _EnemAbility.rarity = Rarity;
+            return _EnemAbility;
         }
 
 
