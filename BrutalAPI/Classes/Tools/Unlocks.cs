@@ -6,6 +6,24 @@ using Utility.SerializableCollection;
 
 namespace BrutalAPI
 {
+    public static class BackwardsUnlockCompatibility
+    {
+        public static void TryUnlockAchievementIfItemIsUnlocked(string itemID, UnlockableModData unlockData)
+        {
+            LoadedDBsHandler.ModdingDB.AddReverseItemAchCheck(itemID, unlockData);
+        }
+
+        public static void TryUnlockAchievementIfCharacterIsUnlocked(string characterID, UnlockableModData unlockData)
+        {
+            LoadedDBsHandler.ModdingDB.AddReverseCharacterAchCheck(characterID, unlockData);
+        }
+
+        public static void TryLockItemBehindAchievement(string achievementID, string itemID)
+        {
+            LoadedDBsHandler.ModdingDB.AddAchievementItemLockCheck(achievementID, itemID);
+        }
+    }
+
     public class Unlocks
     {
         public static UnlockableModData GenerateUnlockData(string id, string achievementUnlockID = "", string questUnlockID = "", string characterUnlockID = "", string[] itemUnlockIDs = null)

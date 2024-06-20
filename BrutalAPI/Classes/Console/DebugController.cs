@@ -64,9 +64,9 @@ namespace BrutalAPI
 
         #region Autocomplete
         public static readonly AutocompletionGroup ItemAutocomplete = new(LoadItemIds);
-        public static readonly AutocompletionGroup CharacterAutocomplete = new(() => LoadedDBsHandler.CharacterDB._charactersList);
-        public static readonly AutocompletionGroup EnemyAutocomplete = new(() => LoadedDBsHandler.EnemyDB._enemiesList);
-        public static readonly AutocompletionGroup PigmentAutocomplete = new(() => LoadedDBsHandler.PigmentDB._PigmentPool.Keys);
+        public static readonly AutocompletionGroup CharacterAutocomplete = new(() => LoadedDBsHandler.CharacterDB.CharactersList);
+        public static readonly AutocompletionGroup EnemyAutocomplete = new(() => LoadedDBsHandler.EnemyDB.EnemiesList);
+        public static readonly AutocompletionGroup PigmentAutocomplete = new(() => LoadedDBsHandler.PigmentDB.PigmentPool.Keys);
         #endregion
 
         #region Log Colors

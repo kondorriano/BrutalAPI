@@ -264,9 +264,11 @@ namespace BrutalAPI
         {
             return LoadedAssetsHandler.GetPassive(passiveID);
         }
-        static public void AddCustomPassiveToPool(BasePassiveAbilitySO passive)
+        static public void AddCustomPassiveToPool(string DatabaseID_PA, string passiveDisplayName, BasePassiveAbilitySO passive)
         {
-            if(passive.name == "")
+            passive.name = DatabaseID_PA;
+            passive._passiveName = passiveDisplayName;
+            if (DatabaseID_PA == "")
             {
                 Debug.LogError($"This passive has no ID! Do it by setting it like this: myPassive.name = myID");
                 return;

@@ -32,6 +32,9 @@ namespace BrutalAPI
         /// <param name="zoneID">Your Zone ID</param>
         public static void AddEncounterToCustomZoneSelector(string encounterID, int priority, string zoneID, BundleDifficulty difficulty)
         {
+            if (!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneID))
+                OverworldZone.Get_Or_CreateAndAdd_EncounterZonePool(zoneID);
+
             LoadedDBsHandler.EnemyDB.AddBundleToSelector(encounterID, priority, zoneID, difficulty);
         }
         /// <summary>
@@ -41,6 +44,9 @@ namespace BrutalAPI
         /// <param name="zoneID">Your Zone ID</param>
         public static void AddEncounterToCustomZoneSpecialSelector(string encounterID, string zoneID, BundleDifficulty difficulty)
         {
+            if(!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneID))
+                OverworldZone.Get_Or_CreateAndAdd_EncounterZonePool(zoneID);
+
             LoadedDBsHandler.EnemyDB.AddBundleToSpecialSelector(encounterID, zoneID, difficulty);
         }
     }

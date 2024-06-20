@@ -136,13 +136,7 @@ namespace BrutalAPI
         #region ABILITIES
         public Ability[] Abilities
         {
-            set
-            {
-                List<EnemyAbilityInfo> eneAbs = new List<EnemyAbilityInfo>();
-                for (int i = 0; i < value.Length; i++)
-                    eneAbs[i] = value[i].GenerateEnemyAbility(true);
-                enemy.abilities = eneAbs;
-            }
+            set => enemy.abilities = value.Select(x => x.GenerateEnemyAbility(true)).ToList();
         }
         public BaseAbilitySelectorSO AbilitySelector
         {

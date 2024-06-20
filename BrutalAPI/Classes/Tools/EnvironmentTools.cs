@@ -13,5 +13,14 @@ namespace BrutalAPI
             CombatEnvironmentHandler data = asset.GetComponent<CombatEnvironmentHandler>();
             LoadedAssetsHandler.AddExternalCombatEnvironment(combatEnvID, data);
         }
+
+        public static void PrepareOverworldEnvPrefab(string prefabBundlePath, string owEnvID, AssetBundle fileBundle)
+        {
+            GameObject asset = fileBundle.LoadAsset<GameObject>(prefabBundlePath);
+            OverworldEnvironmentTransitionHandler handler = asset.AddComponent<OverworldEnvironmentTransitionHandler>();
+            OverworldEnvironmentData data = asset.GetComponent<OverworldEnvironmentData>();
+            handler.m_OWEnvData = data;
+            LoadedAssetsHandler.AddExternalOWEnvironment(owEnvID, handler);
+        }
     }
 }
