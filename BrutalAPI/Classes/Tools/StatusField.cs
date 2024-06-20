@@ -8,6 +8,27 @@ namespace BrutalAPI
 {
     public class StatusField
     {
+        #region Basegame Status Effect Getters
+        public static StatusEffect_SO Focused => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Focused_ID.ToString()];
+        public static StatusEffect_SO Ruptured => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Ruptured_ID.ToString()];
+        public static StatusEffect_SO Frail => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Frail_ID.ToString()];
+        public static StatusEffect_SO OilSlicked => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.OilSlicked_ID.ToString()];
+        public static StatusEffect_SO Spotlight => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Spotlight_ID.ToString()];
+        public static StatusEffect_SO Cursed => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Cursed_ID.ToString()];
+        public static StatusEffect_SO Linked => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Linked_ID.ToString()];
+        public static StatusEffect_SO DivineProtection => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.DivineProtection_ID.ToString()];
+        public static StatusEffect_SO Scars => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Scars_ID.ToString()];
+        public static StatusEffect_SO Gutted => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Gutted_ID.ToString()];
+        public static StatusEffect_SO Stunned => LoadedDBsHandler.StatusFieldDB._StatusEffects[StatusField_GameIDs.Stunned_ID.ToString()];
+        #endregion
+
+        #region Basegame Field Effect Getters
+        public static FieldEffect_SO Constricted => LoadedDBsHandler.StatusFieldDB._FieldEffects[StatusField_GameIDs.Constricted_ID.ToString()];
+        public static FieldEffect_SO OnFire => LoadedDBsHandler.StatusFieldDB._FieldEffects[StatusField_GameIDs.OnFire_ID.ToString()];
+        public static FieldEffect_SO Shield => LoadedDBsHandler.StatusFieldDB._FieldEffects[StatusField_GameIDs.Shield_ID.ToString()];
+        #endregion
+
+        #region Status Effect Tools
         static public void AddNewStatusEffect(StatusEffect_SO status, bool addToGlossary = true)
         {
             LoadedDBsHandler.StatusFieldDB.AddNewStatusEffect(status, addToGlossary);
@@ -25,8 +46,9 @@ namespace BrutalAPI
 
             return status;
         }
+        #endregion
 
-
+        #region Field Effect Tools
         static public void AddNewFieldEffect(FieldEffect_SO field, bool addToGlossary = true)
         {
             LoadedDBsHandler.StatusFieldDB.AddNewFieldEffect(field, addToGlossary);
@@ -56,5 +78,6 @@ namespace BrutalAPI
             EnemyFieldEffectLayout enemData = enemyAsset.GetComponent<EnemyFieldEffectLayout>();
             info.m_EnemyLayoutTemplate = enemData;
         }
+        #endregion
     }
 }
