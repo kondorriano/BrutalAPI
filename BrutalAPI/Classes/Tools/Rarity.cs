@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Rarity
+    static public class Rarity
     {
         static public RaritySO ExtremelyCommon => LoadedDBsHandler.MiscDB.GetRarity("ExtremelyCommon");
         static public RaritySO Common => LoadedDBsHandler.MiscDB.GetRarity("Common");

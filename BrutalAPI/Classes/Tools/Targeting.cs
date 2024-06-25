@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Targeting
+    static public class Targeting
     {
         #region Generic Targeting
         static public BaseCombatTargettingSO Generic_Ally_Middle => LoadedDBsHandler.MiscDB.GetTargeting("GenericTarget_Ally_Middle");

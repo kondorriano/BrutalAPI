@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Visuals
+    static public class Visuals
     {
         static public AttackVisualsSO Abandoned => LoadedDBsHandler.MiscDB.GetVisuals("Abandoned");
         static public AttackVisualsSO Absolve => LoadedDBsHandler.MiscDB.GetVisuals("Absolve");

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BrutalAPI 
 {
-    public static class ItemUtils
+    static public class ItemUtils
     {
         #region Item Pools
         /// <summary>

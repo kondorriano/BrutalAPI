@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Effects
+    static public class Effects
     {
         static public EffectInfo GenerateEffect(EffectSO effect, int entryVariable = 0, BaseCombatTargettingSO target = null, EffectConditionSO condition = null)
         {

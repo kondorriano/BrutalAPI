@@ -6,7 +6,7 @@ using static UnityEngine.TouchScreenKeyboard;
 
 namespace BrutalAPI
 {
-    public class StatusField
+    static public class StatusField
     {
         #region Basegame Status Effect Getters
         public static StatusEffect_SO Focused => LoadedDBsHandler.StatusFieldDB.StatusEffects[StatusField_GameIDs.Focused_ID.ToString()];

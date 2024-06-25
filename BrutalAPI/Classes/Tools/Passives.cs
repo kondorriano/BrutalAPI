@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Passives
+    static public class Passives
     {
         #region In-Game Passive Gets
         static public BasePassiveAbilitySO Abomination1 => LoadedAssetsHandler.GetPassive("Abomination_1_PA");

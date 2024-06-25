@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public  class Misc
+    static public class Misc
     {
         /// <summary>
         /// Be careful, if the ID is already in use, it will create the VSData but not add it to the Pool!
@@ -25,7 +25,7 @@ namespace BrutalAPI
             LoadedDBsHandler.VSAnimDB.AddVSAnimData(bossID, data);
             return data;
         }
-        public static void AddCustom_VSAnimationData(string bossID, VsBossData data)
+        static public void AddCustom_VSAnimationData(string bossID, VsBossData data)
         {
             LoadedDBsHandler.VSAnimDB.AddVSAnimData(bossID, data);
         }

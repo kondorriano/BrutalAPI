@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Priority
+    static public class Priority
     {
         static public PrioritySO ExtremelyFast => LoadedDBsHandler.MiscDB.GetPriority("ExtremelyFast");
         static public PrioritySO VeryFast => LoadedDBsHandler.MiscDB.GetPriority("VeryFast");

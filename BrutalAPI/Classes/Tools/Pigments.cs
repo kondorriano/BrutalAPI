@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public static class Pigments
+    static public class Pigments
     {
         #region In-Game Pigment Gets
         static public ManaColorSO Blue => LoadedDBsHandler.PigmentDB.GetPigment("Blue");

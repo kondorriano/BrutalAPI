@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public static class ResourceLoader
+    static public class ResourceLoader
     {
         public static Texture2D LoadTexture(string name, Assembly assembly = null)
         {

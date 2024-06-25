@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Dialogues
+    static public class Dialogues
     {
         static public void AddCustom_GameOver_BossLines(string bossID, string[] lines)
         {

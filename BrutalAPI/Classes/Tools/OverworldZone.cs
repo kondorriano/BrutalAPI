@@ -6,7 +6,7 @@ using UnityEngine.InputSystem.XR;
 
 namespace BrutalAPI
 {
-    class OverworldZone
+    static public class OverworldZone
     {
         #region ZONE DBs
         /// <summary>
@@ -41,7 +41,7 @@ namespace BrutalAPI
             LoadedDBsHandler.MiscDB.AddNewZone(zoneID, zone);
             return zone;
         }
-        public static void AddCustom_VSAnimationData(string zoneID, ZoneDataBaseSO data)
+        static public void AddCustom_VSAnimationData(string zoneID, ZoneDataBaseSO data)
         {
             LoadedDBsHandler.MiscDB.AddNewZone(zoneID, data);
         }

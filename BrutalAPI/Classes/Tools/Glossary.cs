@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Glossary
+    public static class Glossary
     {
         static public void CreateAndAddCustom_PassiveToGlossary(string passiveName, string passiveDescription, Sprite sprite)
         {

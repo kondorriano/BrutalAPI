@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Tutorials
+    static public class Tutorials
     {
         static public void CreateAndAddCustom_StatusTutorial(StatusEffect_SO status, string dialogueID, string characterStartNode, string enemyStartNode = "")
         {

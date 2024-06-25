@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public static class Portals
+    static public class Portals
     {
         static public string NPCIDColor => "NPC";
         static public string EnemyIDColor => "Enemy";

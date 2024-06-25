@@ -6,7 +6,7 @@ using Utility.SerializableCollection;
 
 namespace BrutalAPI
 {
-    public static class BackwardsUnlockCompatibility
+    static public class BackwardsUnlockCompatibility
     {
         public static void TryUnlockAchievementIfItemIsUnlocked(string itemID, UnlockableModData unlockData)
         {
@@ -24,7 +24,7 @@ namespace BrutalAPI
         }
     }
 
-    public class Unlocks
+    static public class Unlocks
     {
         public static UnlockableModData GenerateUnlockData(string id, string achievementUnlockID = "", string questUnlockID = "", string characterUnlockID = "", string[] itemUnlockIDs = null)
         {

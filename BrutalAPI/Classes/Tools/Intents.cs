@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class Intents
+    static public class Intents
     {
         /// <summary>
         /// You should just use this for checking the intents and not modifying them .If no ID was found, it will return the default one.

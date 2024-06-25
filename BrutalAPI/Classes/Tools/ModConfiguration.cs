@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    class ModConfiguration
+    static public class ModConfiguration
     {
         static public IModInformation PrepareAndAddMyModInformation(string modID)
         {

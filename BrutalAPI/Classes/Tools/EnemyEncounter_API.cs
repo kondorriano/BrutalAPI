@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class EnemyEncounterUtils
+    static public class EnemyEncounterUtils
     {
         /// <summary>
         /// Use this function to add encounters to in game zones.

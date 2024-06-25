@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public class UnitStoreData
+    static public class UnitStoreData
     {
         static public UnitStoreData_BasicSO GetInGame_UnitStoreData(UnitStoredValueNames_GameIDs id)
         {
