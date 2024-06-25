@@ -5,16 +5,16 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    class ModConfiguration
+    public class ModConfiguration
     {
-        static public IModInformation PrepareAndAddMyModInformation(string modID)
+        static public ModInfoData PrepareAndAddMyModInformation(string modID)
         {
             bool isDisabled = LoadedDBsHandler.ModdingDB.IsModDisabled(modID);
             ModInfoData modData = new ModInfoData(modID, !isDisabled);
             LoadedDBsHandler.ModdingDB.AddNewModInfoData(modData);
             return modData;
         }
-        static public IModInformation PrepareAndAddMyModInformation(string modID, string name, string description, string credits, Sprite icon = null, bool showIconOnMainMenu = false)
+        static public ModInfoData PrepareAndAddMyModInformation(string modID, string name, string description, string credits, Sprite icon = null, bool showIconOnMainMenu = false)
         {
             bool isDisabled = LoadedDBsHandler.ModdingDB.IsModDisabled(modID);
             ModInfoData modData = new ModInfoData(modID, !isDisabled);

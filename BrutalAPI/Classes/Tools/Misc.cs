@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BrutalAPI
 {
-    public  class Misc
+    public class Misc
     {
         /// <summary>
         /// Be careful, if the ID is already in use, it will create the VSData but not add it to the Pool!

@@ -6,7 +6,7 @@ using UnityEngine.InputSystem.XR;
 
 namespace BrutalAPI
 {
-    class OverworldZone
+    public class OverworldZone
     {
         #region ZONE DBs
         /// <summary>
