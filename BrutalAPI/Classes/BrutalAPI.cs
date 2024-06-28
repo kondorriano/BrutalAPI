@@ -4,6 +4,8 @@ using System.IO;
 using System.Xml;
 using UnityEngine;
 using HarmonyLib;
+using static System.Net.Mime.MediaTypeNames;
+using System;
 
 namespace BrutalAPI
 {
@@ -30,7 +32,7 @@ namespace BrutalAPI
 
             //Load Mod Config Data
             PrepareModInfoData();
-
+            
             Logger.LogInfo("BrutalAPI loaded successfully!");
         }
 
