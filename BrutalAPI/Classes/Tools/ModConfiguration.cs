@@ -27,5 +27,10 @@ namespace BrutalAPI
             LoadedDBsHandler.ModdingDB.AddNewModInfoData(modData);
             return modData;
         }
+
+        static public bool IsModDisabled(string modID) 
+        { 
+            return LoadedDBsHandler.ModdingDB.IsModDisabled(modID);
+        }
     }
 }
