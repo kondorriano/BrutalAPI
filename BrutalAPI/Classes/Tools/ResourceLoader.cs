@@ -82,6 +82,11 @@ namespace BrutalAPI
             return fileBundle.LoadAsset<YarnProgram>(yarnBundlePath);
         }
 
+        public static ParticleSystem LoadParticleSystemFromAssetBundle(string particleBundlePath, AssetBundle fileBundle)
+        {
+            return fileBundle.LoadAsset<GameObject>(particleBundlePath).GetComponent<ParticleSystem>();
+        }
+
         #region Music and Sound stuff
         /*
         public static void CreateSoundBankFile(string resourceName, bool onlyIfNotExist = false)

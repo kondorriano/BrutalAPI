@@ -226,7 +226,8 @@ namespace BrutalAPI
             enemy.priority = LoadedDBsHandler.MiscDB.DefaultPriority;
             //Basic Ability selector
             enemy.abilitySelector = LoadedDBsHandler.MiscDB.RarityAbilitySelector;
-
+            //Enemy Loot
+            enemy.enemyLoot = new EnemyLoot();
             //Initialize Lists here?
             enemy.unitTypes = new List<string>();
             enemy.passiveAbilities = new List<BasePassiveAbilitySO>();
@@ -235,7 +236,7 @@ namespace BrutalAPI
             enemy.exitEffects = new EffectInfo[0];
         }
 
-        public void PrepareEnemyPrefab(string prefabBundlePath, AssetBundle fileBundle)
+        public void PrepareEnemyPrefab(string prefabBundlePath, AssetBundle fileBundle, ParticleSystem gibs = null)
         {
             GameObject asset = fileBundle.LoadAsset<GameObject>(prefabBundlePath);
             EnemyInFieldLayout layout = asset.AddComponent<EnemyInFieldLayout>();
@@ -245,6 +246,9 @@ namespace BrutalAPI
                 data = asset.AddComponent<EnemyInFieldLayout_Data>();
                 data.SetDefaultData();
             }
+            if(gibs != null)
+                data.m_Gibs = gibs;
+
             layout.m_Data = data;
             enemy.enemyTemplate = layout;
         }
@@ -258,7 +262,7 @@ namespace BrutalAPI
         }
         public void AddLootData(EnemyLootItemProbability[] data)
         {
-            enemy.enemyLoot = new EnemyLoot(data);
+            enemy.enemyLoot._lootableItems = data;
         }
         public void AddUnitType(string unitType)
         {

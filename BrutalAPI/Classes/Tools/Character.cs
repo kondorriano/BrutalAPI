@@ -110,6 +110,13 @@ namespace BrutalAPI
                 character.extraCombatSprites = value;
             }
         }
+        public bool StartsLocked
+        {
+            set
+            {
+                character.m_StartsLocked = value;
+            }
+        }
         public string DamageSound
         {
             set

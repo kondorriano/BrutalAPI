@@ -86,6 +86,9 @@
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>..\..\References\Unity\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>..\..\References\Unity\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
     <Reference Include="YarnSpinner.Unity">
       <HintPath>..\..\References\Unity\YarnSpinner.Unity.dll</HintPath>
     </Reference>

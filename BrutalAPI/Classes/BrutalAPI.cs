@@ -29,9 +29,6 @@ namespace BrutalAPI
             HarmonyInstance.PatchAll();
 
             _ = DebugController.Instance; // Ensure DebugController's existence.
-
-            //Load Mod Config Data
-            PrepareModInfoData();
             
             Logger.LogInfo("BrutalAPI loaded successfully!");
         }
@@ -42,26 +39,6 @@ namespace BrutalAPI
                                          "Open Console Key",  // The key of the configuration option in the configuration file
                                          "*", // The default value
                                          "They key that needs to be pressed to open the debug console."); // Description of the option to show in the config file
-        }
-
-        void PrepareModInfoData()
-        {
-            LoadedDBsHandler.ModdingDB.LoadDisabledModInfo();
-            ModInfoData modData = new ModInfoData(GUID, true);
-            modData.name = NAME;
-            modData.description = "To Do";
-            modData.credits = "A bunch of cool people";
-            modData.canBeDisabled = false;
-            LoadedDBsHandler.ModdingDB.AddNewModInfoData(modData);
-            /*
-            IModInformation modTest = ModConfiguration.PrepareAndAddMyModInformation("test");
-            modTest.DisplayName = "Cool Mod";
-            modTest.Description = "This mod does cool things";
-            modTest.Credits = "Made by CoolModder_52";
-            modTest.ShowIconOnMainMenu = true;
-            modTest.Icon = Pigments.Green.manaSprite;
-            Debug.Log("This mod " + ((modTest.CanILoadTheMod) ? "can" : "cannot") + " be loaded");
-            */
         }
     }
 }
