@@ -26,6 +26,11 @@ namespace BrutalAPI
 
     static public class Unlocks
     {
+        public static void AddCustomSaveIconUnlockToPool(string achievementID, Sprite icon, bool alwaysUnlockedIfNew = false)
+        {
+            LoadedDBsHandler.MiscDB.AddNewSaveIcon(achievementID, icon, alwaysUnlockedIfNew);
+        }
+
         public static UnlockableModData GenerateUnlockData(string id, string achievementUnlockID = "", string questUnlockID = "", string characterUnlockID = "", string[] itemUnlockIDs = null)
         {
             UnlockableModData data = new UnlockableModData(id);
