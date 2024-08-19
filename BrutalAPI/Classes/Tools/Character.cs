@@ -248,9 +248,9 @@ namespace BrutalAPI
         }
         public void AddCharacter(bool unlockCharacter = false, bool omitOnFoolsBoard = false)
         {
+            StartsLocked = !unlockCharacter;
+
             LoadedDBsHandler.CharacterDB.AddNewCharacter(character.name, character, menuCharacter, ignoredSupport, ignoredDPS);
-            if (unlockCharacter)
-                LoadedDBsHandler.ModdingDB.AddUnlockedCharacter(character.name);
             if (omitOnFoolsBoard)
                 LoadedDBsHandler.MiscDB.AddOmittedFoolToZones(character.name);
         }
