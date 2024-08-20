@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace BrutalAPI
 {
@@ -18,6 +19,8 @@ namespace BrutalAPI
             handler._npcSelectable = GetRoomItemComponent(handler, data.m_NpcSelectable);
             handler._extraSelectable = GetRoomItemComponent(handler, data.m_ExtraSelectable);
 
+            Misc.Prepare_LocalizedImages(asset);
+
             LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
         }
 
@@ -28,6 +31,8 @@ namespace BrutalAPI
             Shop_RoomHandlerModData data = asset.GetComponent<Shop_RoomHandlerModData>();
 
             handler._shopSelectable = GetRoomItemComponent(handler, data.m_ShopSelectable) as BasicRoomItem;
+
+            Misc.Prepare_LocalizedImages(asset);
 
             LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
         }
@@ -41,6 +46,8 @@ namespace BrutalAPI
             handler._foolRenderers = data.m_FoolRenderers;
             handler._foolsSelectable = GetRoomItemComponent(handler, data.m_FoolsSelectable) as BasicRoomItem;
 
+            Misc.Prepare_LocalizedImages(asset);
+
             LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
         }
 
@@ -52,6 +59,8 @@ namespace BrutalAPI
 
             handler._prizeSelectable = GetRoomItemComponent(handler, data.m_TreasureSelectable) as AnimatedRoomItem;
 
+            Misc.Prepare_LocalizedImages(asset);
+
             LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
         }
 
@@ -62,6 +71,8 @@ namespace BrutalAPI
             MoneyChest_RoomHandlerModData data = asset.GetComponent<MoneyChest_RoomHandlerModData>();
 
             handler._moneyChestSelectable = GetRoomItemComponent(handler, data.m_MoneyChestSelectable) as AnimatedRoomItem;
+
+            Misc.Prepare_LocalizedImages(asset);
 
             LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
         }

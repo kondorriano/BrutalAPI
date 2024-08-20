@@ -90,5 +90,15 @@ namespace BrutalAPI
         {
             LoadedDBsHandler.CombatDB.AddNewTextColor(id, gradient);
         }
+
+        static public void Prepare_LocalizedImages(GameObject asset)
+        {
+            LocalizedImage_ModData locData = asset.GetComponent<LocalizedImage_ModData>();
+            if (locData != null)
+            {
+                ImageRendererLocalizationManager locManager = asset.AddComponent<ImageRendererLocalizationManager>();
+                locManager.FillWithModData(locData);
+            }
+        }
     }
 }

@@ -11,6 +11,9 @@ namespace BrutalAPI
         {
             GameObject asset = fileBundle.LoadAsset<GameObject>(prefabBundlePath);
             CombatEnvironmentHandler data = asset.GetComponent<CombatEnvironmentHandler>();
+
+            Misc.Prepare_LocalizedImages(asset);
+
             LoadedAssetsHandler.AddExternalCombatEnvironment(combatEnvID, data);
         }
 
