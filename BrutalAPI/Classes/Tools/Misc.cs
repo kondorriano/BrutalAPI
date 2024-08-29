@@ -100,5 +100,116 @@ namespace BrutalAPI
                 locManager.FillWithModData(locData);
             }
         }
+
+        #region UI Text Colors
+        public enum UITextColorIDs
+        {
+            Positive,
+            Negative,
+            Parasite
+        }
+
+        /// <summary>
+        /// Has the colours used by the tooltips in combat for easy access.
+        /// </summary>
+        /// <returns></returns>
+        static public Color GetInGame_UITextColor(UITextColorIDs id)
+        {
+            return LoadedDBsHandler.MiscDB.GetTextColor(id.ToString());
+        }
+        static public Color GetCustom_UITextColor(string id)
+        {
+            return LoadedDBsHandler.MiscDB.GetTextColor(id);
+        }
+        static public void AddCustom_UITextColor(string id, Color col)
+        {
+            LoadedDBsHandler.MiscDB.AddNewTextColor(id, col);
+        }
+        #endregion
+
+        #region Materials
+        public enum MaterialIDs
+        {
+            Outline,
+            Character,
+            Character_Obliteration,
+            Portal
+        }
+
+        /// <summary>
+        /// Has useful materials used by the game
+        /// </summary>
+        /// <returns></returns>
+        static public Material GetInGame_Material(MaterialIDs id)
+        {
+            return LoadedDBsHandler.MiscDB.GetMaterial(id.ToString());
+        }
+        static public Material GetCustom_Material(string id)
+        {
+            return LoadedDBsHandler.MiscDB.GetMaterial(id);
+        }
+        static public void AddCustom_Material(string id, Material mat)
+        {
+            LoadedDBsHandler.MiscDB.AddMaterial(id, mat);
+        }
+        #endregion
+
+        #region Modular Options
+        /// <summary>
+        /// Has the Modular Options from the game
+        /// </summary>
+        /// <returns></returns>
+        static public BaseModularOptSO GetInGame_ModularOption(ModularOption_GameIDs id)
+        {
+            return LoadedDBsHandler.MiscDB.GetModularOption(id.ToString());
+        }
+        static public BaseModularOptSO GetCustom_ModularOption(string id)
+        {
+            return LoadedDBsHandler.MiscDB.GetModularOption(id);
+        }
+        /// <summary>
+        /// Use this one if you are creating your own prefab. Use the AddInGame otherwise (for clarity)
+        /// </summary>
+        static public void AddCustom_ModularOption(string id, BaseModularOptSO mOpt)
+        {
+            LoadedDBsHandler.MiscDB.AddNewModularOption(id, mOpt);
+        }
+        static public void AddInGame_ToggleModularOption(string id, Toggle_MOpt mOpt)
+        {
+            LoadedDBsHandler.MiscDB.AddNewModularOption(id, mOpt);
+        }
+        static public void AddInGame_SliderModularOption(string id, Slider_MOpt mOpt)
+        {
+            LoadedDBsHandler.MiscDB.AddNewModularOption(id, mOpt);
+        }
+        static public void AddInGame_DropdownModularOption(string id, Dropdown_MOpt mOpt)
+        {
+            LoadedDBsHandler.MiscDB.AddNewModularOption(id, mOpt);
+        }
+
+
+        /// <summary>
+        /// Has the Modular Categories from the game
+        /// </summary>
+        /// <returns></returns>
+        static public ModularCategorySO GetInGame_ModularCategory(ModularCategory_GameIDs id)
+        {
+            if(LoadedDBsHandler.MiscDB.TryGetModularCategory(id.ToString(), out ModularCategorySO modularCategory))
+                return modularCategory;
+
+            return null;
+        }
+        static public ModularCategorySO GetCustom_ModularCategory(string id)
+        {
+            if (LoadedDBsHandler.MiscDB.TryGetModularCategory(id, out ModularCategorySO modularCategory))
+                return modularCategory;
+
+            return null;
+        }
+        static public void AddInGame_ModularCategory(string id, ModularCategorySO mCat)
+        {
+            LoadedDBsHandler.MiscDB.AddNewModularCategory(id, mCat);
+        }
+        #endregion
     }
 }
