@@ -21,7 +21,9 @@ namespace BrutalAPI
 
             Misc.Prepare_LocalizedImages(asset);
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         public static void Prepare_Shop_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
@@ -34,7 +36,9 @@ namespace BrutalAPI
 
             Misc.Prepare_LocalizedImages(asset);
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         public static void Prepare_Fools_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
@@ -48,7 +52,9 @@ namespace BrutalAPI
 
             Misc.Prepare_LocalizedImages(asset);
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         public static void Prepare_Treasure_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
@@ -61,7 +67,9 @@ namespace BrutalAPI
 
             Misc.Prepare_LocalizedImages(asset);
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         public static void Prepare_MoneyChest_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
@@ -74,7 +82,9 @@ namespace BrutalAPI
 
             Misc.Prepare_LocalizedImages(asset);
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         public static void Prepare_Enemy_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
@@ -93,7 +103,9 @@ namespace BrutalAPI
             for (int i = 0; i < handler._enemySelectables.Length; i++)
                 handler._enemySelectables[i] = GetRoomItemComponent(handler, data.m_EnemySelectables[i]) as BasicRoomItem;
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         public static void Prepare_Boss_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
@@ -112,7 +124,9 @@ namespace BrutalAPI
             handler._extraSelectable = GetRoomItemComponent(handler, data.m_ExtraSelectable);
 
 
-            LoadedAssetsHandler.AddExternalOWRoom(roomID, handler);
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
         }
 
         static BaseRoomItem GetRoomItemComponent(BaseRoomHandler handler, BaseRoomItemModData data)
