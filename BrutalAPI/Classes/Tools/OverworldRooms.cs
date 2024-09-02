@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
+using static BrutalAPI.Misc;
 
 namespace BrutalAPI
 {
@@ -134,27 +135,33 @@ namespace BrutalAPI
             if (data == null)
                 return null;
 
+            Material outlineMat = LoadedDBsHandler.MiscDB.GetMaterial(MaterialIDs.Outline.ToString());
             switch (data.RoomItemType)
             {
                 case "Basic":
                     BasicRoomItem basic_item = data.gameObject.AddComponent<BasicRoomItem>();
                     basic_item.FillWithModData(data as Basic_RoomItemModData);
+                    basic_item.SetMaterials(outlineMat);
                     return basic_item;
                 case "Animated":
                     AnimatedRoomItem anim_item = data.gameObject.AddComponent<AnimatedRoomItem>();
                     anim_item.FillWithModData(data as Animated_RoomItemModData);
+                    anim_item.SetMaterials(outlineMat);
                     return anim_item;
                 case "MandatoryNPC":
                     MandatoryNPCRoomItem mand_item = data.gameObject.AddComponent<MandatoryNPCRoomItem>();
                     mand_item.FillWithModData(handler as NPCRoomHandler, data as MandatoryNPC_RoomItemModData);
+                    mand_item.SetMaterials(outlineMat);
                     return mand_item;
                 case "CustomDialogue":
                     CustomDialogRoomItem dial_item = data.gameObject.AddComponent<CustomDialogRoomItem>();
                     dial_item.FillWithModData(data as CustomDialogue_RoomItemModData);
+                    dial_item.SetMaterials(outlineMat);
                     return dial_item;
                 case "CustomDialogueByQuest":
                     CustomDialogByQuestRoomItem diqu_item = data.gameObject.AddComponent<CustomDialogByQuestRoomItem>();
                     diqu_item.FillWithModData(data as CustomDialogueByQuest_RoomItemModData);
+                    diqu_item.SetMaterials(outlineMat);
                     return diqu_item;
             }
 

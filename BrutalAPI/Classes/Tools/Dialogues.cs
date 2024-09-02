@@ -54,20 +54,28 @@ namespace BrutalAPI
         static public SpeakerData CreateAndAddCustom_SpeakerData(string speakerID, SpeakerBundle bundleData, bool portraitLooksLeft, bool portraitLooksCenter = false, SpeakerEmote[] emotes = null)
         {
             SpeakerData data = ScriptableObject.CreateInstance<SpeakerData>();
-            data.name = speakerID;
             data.speakerName = speakerID;
+
+            if (!speakerID.EndsWith(Tools.PathUtils.speakerDataSuffix))
+                speakerID = speakerID + Tools.PathUtils.speakerDataSuffix;
+            data.name = speakerID;
+
             data._defaultBundle = bundleData;
             data.portraitLooksLeft = portraitLooksLeft;
             data.portraitLooksCenter = portraitLooksCenter;
-            data._emotionBundles = emotes;
+            data._emotionBundles = (emotes == null) ? new SpeakerEmote[0] : emotes;
 
-            LoadedDBsHandler.DialogueDB.AddNewSpeakerData(speakerID, data);
+            LoadedDBsHandler.DialogueDB.AddNewSpeakerData(data.name, data);
             return data;
         }
 
         static public void AddCustom_SpeakerData(string speakerID, SpeakerData data)
         {
-            LoadedDBsHandler.DialogueDB.AddNewSpeakerData(speakerID, data);
+            if(!speakerID.EndsWith(Tools.PathUtils.speakerDataSuffix))
+                speakerID = speakerID + Tools.PathUtils.speakerDataSuffix;
+
+            data.name = speakerID;
+            LoadedDBsHandler.DialogueDB.AddNewSpeakerData(data.name, data);
         }
         #endregion
 
