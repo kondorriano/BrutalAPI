@@ -220,6 +220,9 @@ namespace BrutalAPI
             if(_EnemAbilityGenerated)
                 return _EnemAbility;
 
+            if (ability.abilitySprite == null)
+                ability.abilitySprite = LoadedDBsHandler.EnemyDB.DefaultAbilitySprite;
+
             _EnemAbilityGenerated = true;
             _EnemAbility = new EnemyAbilityInfo();
             _EnemAbility.ability = ability;
