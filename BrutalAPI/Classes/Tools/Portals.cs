@@ -23,5 +23,10 @@ namespace BrutalAPI
         {
             LoadedDBsHandler.PortalDB.ModifyPortalColor(id, color);
         }
+
+        static public void AddPortalBackground(string id, Sprite sprite)
+        {
+            LoadedDBsHandler.PortalDB.AddBackgroundPortal(id, sprite);
+        }
     }
 }
