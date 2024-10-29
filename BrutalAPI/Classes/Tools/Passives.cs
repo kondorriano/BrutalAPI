@@ -97,6 +97,8 @@ namespace BrutalAPI
             { 3, BoneSpurs3 }
         };
 
+        private static readonly Dictionary<int, BasePassiveAbilitySO> GeneratedOldBoneSpurs = [];
+
         private static readonly Dictionary<int, BasePassiveAbilitySO> GeneratedCashout = new()
         {
             { 1, Cashout }
@@ -223,6 +225,7 @@ namespace BrutalAPI
 
         private static readonly EffectSO BoneSpurs_Damage_Effect = (BoneSpurs1 as PerformEffectPassiveAbility).effects[0].effect;
         private static readonly UnitStoreData_BasicSO BoneSpurs_ExtraDamage_SV = BoneSpurs1.specialStoredData;
+        private static readonly EffectorConditionSO BoneSpurs_EffectorCondition = BoneSpurs1.conditions[0];
 
         private static readonly EffectSO Cashout_ProduceMoney_Effect = (Cashout as PerformEffectAddingResultPassiveAbility).effects[0].effect;
 
@@ -315,6 +318,35 @@ namespace BrutalAPI
                 var pa = ScriptableObject.CreateInstance<PerformEffectPassiveAbility>();
 
                 pa.name = $"BoneSpurs_{x}_PA";
+                pa.m_PassiveID = PassiveType_GameIDs.BoneSpurs.ToString();
+
+                pa._passiveName = $"Bone Spurs ({x})";
+                pa._characterDescription = $"Deal {x} indirect damage to the Opposing enemy upon receiving direct damage, even if the damage dealt is 0.";
+                pa._enemyDescription = $"Deal {x} indirect damage to the Opposing party member upon receiving direct damage, even if the damage dealt is 0.";
+
+                pa.passiveIcon = BoneSpurs1.passiveIcon;
+
+                pa._triggerOn = new TriggerCalls[] { TriggerCalls.OnBeingDamaged };
+                pa.effects = new EffectInfo[]
+                {
+                    Effects.GenerateEffect(BoneSpurs_Damage_Effect, amount, Targeting.Slot_Front),
+                };
+
+                pa.conditions = new EffectorConditionSO[] { BoneSpurs_EffectorCondition };
+                pa.doesPassiveTriggerInformationPanel = true;
+                pa.specialStoredData = BoneSpurs_ExtraDamage_SV;
+
+                return pa;
+            });
+        }
+
+        public static BasePassiveAbilitySO OldBoneSpursGenerator(int amount)
+        {
+            return GetOrCreatePassive(GeneratedOldBoneSpurs, amount, x =>
+            {
+                var pa = ScriptableObject.CreateInstance<PerformEffectPassiveAbility>();
+
+                pa.name = $"OldBoneSpurs_{x}_PA";
                 pa.m_PassiveID = PassiveType_GameIDs.BoneSpurs.ToString();
 
                 pa._passiveName = $"Bone Spurs ({x})";
