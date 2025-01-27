@@ -60,6 +60,11 @@ namespace BrutalAPI
         public static readonly DebugCommand ENDCOMBAT;
         public static readonly DebugCommand PIGMENT;
         public static readonly DebugCommand SKIP;
+        public static readonly DebugCommand REFRESH;
+        public static readonly DebugCommand CONSUMEPIGMENT;
+        public static readonly DebugCommand CHANGENEXTZONEBOSS;
+        public static readonly DebugCommand UNLOCKCONTENT;
+        public static readonly DebugCommand LOCKCONTENT;
         #endregion
 
         #region Autocomplete
@@ -67,6 +72,8 @@ namespace BrutalAPI
         public static readonly AutocompletionGroup CharacterAutocomplete = new(() => LoadedDBsHandler.CharacterDB.CharactersList);
         public static readonly AutocompletionGroup EnemyAutocomplete = new(() => LoadedDBsHandler.EnemyDB.EnemiesList);
         public static readonly AutocompletionGroup PigmentAutocomplete = new(() => LoadedDBsHandler.PigmentDB.PigmentPool.Keys);
+        public static readonly AutocompletionGroup BossAutocomplete = new(LoadBossIds);
+        public static readonly AutocompletionGroup UnlocksAutocomplete = new(() => LoadUnlockables().Keys);
         #endregion
 
         #region Log Colors
@@ -262,7 +269,8 @@ namespace BrutalAPI
             {
                 new NumericalCommandArgument("damage"),
                 new NumericalCommandArgument("slot", 0),
-                new BoolCommandArgumnt("damageCharacters")
+                new BoolCommandArgumnt("damageCharacters"),
+                new BoolCommandArgumnt("indirect", true)
             },
             args =>
             {
@@ -270,9 +278,23 @@ namespace BrutalAPI
                 var slot = args[1].Read<int>();
                 var characters = args[2].Read<bool>();
 
-                var dmgEffect = Effects.GenerateEffect(ScriptableObject.CreateInstance<DamageEffect>(), dmg, Targeting.GenerateGenericTarget([slot], characters));
+                if (!args[3].TryRead<bool>(out var indirect))
+                    indirect = false;
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction([dmgEffect], CombatManager.Instance._stats.CharactersOnField.First().Value));
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    var target = x.combatSlots.GetGenericAllySlotTarget(slot, characters);
+                    if (target == null || !target.HasUnit)
+                        return;
+
+                    var u = target.Unit;
+                    var targetOffs = target.SlotID - u.SlotID;
+
+                    if (indirect)
+                        u.Damage(dmg, null, DeathType_GameIDs.Basic.ToString(), targetOffs, false, false, true, "");
+                    else
+                        u.Damage(dmg, null, DeathType_GameIDs.Basic.ToString(), targetOffs, true, true, false, "");
+                }));
 
                 Instance.WriteLine($"Damaged {(characters ? "character" : "enemy")} in slot {slot} for {dmg} damage.");
             });
@@ -282,7 +304,8 @@ namespace BrutalAPI
             {
                 new NumericalCommandArgument("healing"),
                 new NumericalCommandArgument("slot", 0),
-                new BoolCommandArgumnt("healCharacters")
+                new BoolCommandArgumnt("healCharacters"),
+                new BoolCommandArgumnt("indirect", true)
             },
             args =>
             {
@@ -290,9 +313,18 @@ namespace BrutalAPI
                 var slot = args[1].Read<int>();
                 var characters = args[2].Read<bool>();
 
-                var healEffect = Effects.GenerateEffect(ScriptableObject.CreateInstance<HealEffect>(), heal, Targeting.GenerateGenericTarget([slot], characters));
+                if (!args[3].TryRead<bool>(out var indirect))
+                    indirect = false;
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction([healEffect], CombatManager.Instance._stats.CharactersOnField.First().Value));
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    var target = x.combatSlots.GetGenericAllySlotTarget(slot, characters);
+                    if (target == null || !target.HasUnit)
+                        return;
+
+                    var u = target.Unit;
+                    u.Heal(heal, null, !indirect, "");
+                }));
 
                 Instance.WriteLine($"Healed {(characters ? "character" : "enemy")} in slot {slot} for {heal} health.");
             });
@@ -346,12 +378,10 @@ namespace BrutalAPI
             //ENDCOMBAT
             ENDCOMBAT = new("endcombat", "Instantly ends the current combat.", [], args =>
             {
-                var combatEndEffect = ScriptableObject.CreateInstance<CombatEndEffect>();
-                combatEndEffect._ignoreLoot = false;
-
-                EffectInfo effect = Effects.GenerateEffect(combatEndEffect);
-
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction(new EffectInfo[1] { effect }, CombatManager.Instance._stats.CharactersOnField.First().Value));
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    x.TriggerPrematureFinalization();
+                }));
 
                 Instance.WriteLine("Ended combat.");
             });
@@ -363,7 +393,7 @@ namespace BrutalAPI
             },
             args =>
             {
-                var effects = new List<EffectInfo>();
+                var pigments = new List<ManaColorSO>();
 
                 foreach (var arg in args)
                 {
@@ -375,17 +405,17 @@ namespace BrutalAPI
                     if (pigment == null)
                     {
                         Instance.WriteLine($"Invalid pigment \"{pigmentId}\".", LogLevel.Error);
-
                         continue;
                     }
 
-                    var colorManaEffect = ScriptableObject.CreateInstance<GenerateColorManaEffect>();
-                    colorManaEffect.mana = pigment;
-
-                    effects.Add(Effects.GenerateEffect(colorManaEffect, 1));
+                    pigments.Add(pigment);
                 }
 
-                CombatManager.Instance.AddPriorityRootAction(new EffectAction([.. effects], CombatManager.Instance._stats.CharactersOnField.First().Value));
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    foreach (var p in pigments)
+                        x.MainManaBar.AddMana(p);
+                }));
             }, true);
 
             SKIP = new("skip", "Skips the current enemy room", [], args =>
@@ -395,7 +425,6 @@ namespace BrutalAPI
                 if (run == null)
                 {
                     Instance.WriteLine("No active run.", LogLevel.Error);
-
                     return;
                 }
 
@@ -404,7 +433,6 @@ namespace BrutalAPI
                 if (zone == null)
                 {
                     Instance.WriteLine("No active zone.", LogLevel.Error);
-
                     return;
                 }
 
@@ -413,14 +441,12 @@ namespace BrutalAPI
                 if (card == null)
                 {
                     Instance.WriteLine("No active room.", LogLevel.Error);
-
                     return;
                 }
 
-                if(card.CardType == CardType.Boss)
+                if (card.CardType == CardType.Boss)
                 {
                     Instance.WriteLine("Can't skip boss rooms.", LogLevel.Error);
-
                     return;
                 }
 
@@ -432,6 +458,191 @@ namespace BrutalAPI
                     ui.SetPileButtonState(true);
 
                 Instance.WriteLine("Skipping current room.");
+            });
+
+            REFRESH = new("refresh", "Refreshes the target character's abilities and movement.", new()
+            {
+                new NumericalCommandArgument("slot", 0),
+                new BoolCommandArgumnt("refreshAbilities", true),
+                new BoolCommandArgumnt("refreshMovement", true),
+            }, args =>
+            {
+                var slot = args[0].Read<int>();
+
+                if (!args[1].TryRead<bool>(out var refreshAbilities))
+                    refreshAbilities = true;
+                if (!args[2].TryRead<bool>(out var refreshMovement))
+                    refreshMovement = true;
+
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    var target = x.combatSlots.GetGenericAllySlotTarget(slot, true);
+                    if (target == null || !target.HasUnit)
+                        return;
+
+                    var u = target.Unit;
+
+                    if (refreshAbilities)
+                        u.RefreshAbilityUse();
+                    if (refreshMovement)
+                        u.RestoreSwapUse();
+                }));
+
+                Instance.WriteLine($"Refreshed character in slot {slot}");
+            });
+
+            CONSUMEPIGMENT = new("consumepigment", "Consumes all pigment from the pigment bar", [], args =>
+            {
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    x.MainManaBar.ConsumeAllMana();
+                }));
+            });
+
+            CHANGENEXTZONEBOSS = new("changenextzoneboss", "Replaces the next area's boss. Can only replace the boss with bosses that can normally appear in the next area.", new()
+            {
+                new StringCommandArgument("boss", BossAutocomplete)
+            }, args =>
+            {
+                var boss = args[0].Read<string>();
+
+                var infoHolder = LoadedDBsHandler.InfoHolder;
+                var run = infoHolder.Run;
+                if (run == null)
+                {
+                    Instance.WriteLine("No active run.", LogLevel.Error);
+                    return;
+                }
+                if (run.CurrentZoneID + 1 >= run.zoneData.Count)
+                {
+                    Instance.WriteLine("No next zone.", LogLevel.Error);
+                    return;
+                }
+
+                var runZone = run.zoneData[run.CurrentZoneID + 1];
+                var zoneData = runZone.LoadZoneDB();
+                if (zoneData == null || zoneData.Equals(null))
+                {
+                    Instance.WriteLine("Invalid next zone.", LogLevel.Error);
+                    return;
+                }
+
+                var bossBundles = runZone.BossBundleArray;
+                if (bossBundles.Length == 0)
+                {
+                    Instance.WriteLine("Next zone has no boss.", LogLevel.Error);
+                    return;
+                }
+
+                var lastBoss = bossBundles[bossBundles.Length - 1];
+                if (boss == lastBoss.BossID)
+                {
+                    Instance.WriteLine($"Successfully swapped the next zone's boss to {boss}");
+                    return;
+                }
+
+                var newBoss = zoneData.TryGenerateBossBundle(boss);
+                if (newBoss == null)
+                {
+                    Instance.WriteLine($"Invalid boss \"{boss}\"", LogLevel.Error);
+                    return;
+                }
+
+                runZone.SwapBossBundle(bossBundles.Length - 1, newBoss);
+                Instance.WriteLine($"Successfully swapped the next zone's boss to {boss}");
+            });
+
+            UNLOCKCONTENT = new("unlockcontent", "Unlocks unlockable content.", new()
+            {
+                new StringCommandArgument("unlockableId", UnlocksAutocomplete)
+            }, args =>
+            {
+                var id = args[0].Read<string>();
+                var unlocks = LoadUnlockables();
+
+                if (!unlocks.TryGetValue(id, out var unlockData))
+                {
+                    Instance.WriteLine($"Invalid unlockable \"{id}\".");
+                    return;
+                }
+
+                LoadedDBsHandler.InfoHolder.UnlockableManager.TryUnlockContent(unlockData);
+                Instance.WriteLine($"Successfully unlocked unlockable {id}");
+            });
+
+            LOCKCONTENT = new("lockcontent", "Locks unlocked content.", new()
+            {
+                new StringCommandArgument("unlockableId", UnlocksAutocomplete)
+            }, args =>
+            {
+                var id = args[0].Read<string>();
+                var unlocks = LoadUnlockables();
+
+                if (!unlocks.TryGetValue(id, out var unlockData))
+                {
+                    Instance.WriteLine($"Invalid unlockable \"{id}\".");
+                    return;
+                }
+
+                var infoHolder = LoadedDBsHandler.InfoHolder;
+                var game = infoHolder.Game;
+                var unlockManager = infoHolder.UnlockableManager;
+                var achs = unlockManager._steamAchievements;
+
+                if (unlockData.hasQuestCompletion && game != null)
+                {
+                    var dat = game.m_Data;
+                    dat.completedQuests.Remove(unlockData.questID);
+                    dat.NeedsToBeSaved = true;
+                }
+
+                if(unlockData.hasCharacterUnlock && game != null)
+                {
+                    var dat = game.m_Data;
+                    var unlocked = dat.unlockedCharacters.Contains(unlockData.character);
+
+                    dat.unlockedCharacters.Remove(unlockData.character);
+                    dat.NeedsToBeSaved = true;
+
+                    if (unlocked)
+                    {
+                        unlockManager.FreshlyCharacters.Remove(unlockData.character);
+                        unlockManager._LoadedFreshs.NeedsToBeSaved = true;
+                    }
+                }
+
+                if(unlockData.hasItemUnlock && unlockData.items != null && game != null)
+                {
+                    foreach(var itm in unlockData.items)
+                    {
+                        if (string.IsNullOrEmpty(itm))
+                            continue;
+
+                        var dat = game.m_Data;
+                        var unlocked = dat.unlockedItems.Contains(itm);
+
+                        dat.unlockedItems.Remove(itm);
+                        dat.NeedsToBeSaved = true;
+
+                        if (unlocked)
+                        {
+                            unlockManager.FreshlyItems.Remove(itm);
+                            unlockManager._LoadedFreshs.NeedsToBeSaved = true;
+                        }
+                    }
+                }
+
+                if (unlockData.HasAchievementUnlock)
+                    Instance.WriteLine("Can't lock steam achievements", LogLevel.Warning);
+
+                if (unlockData.hasModdedAchievementUnlock && achs != null && achs.m_ModdedAchievementDict.TryGetValue(unlockData.moddedAchievementID, out var ach) && ach != null && ach.m_offlinebAchieved)
+                {
+                    ach.m_offlinebAchieved = false;
+                    achs._LoadedAchievements.moddedAchievementIDs.Remove(ach.m_eAchievementID);
+                    achs._LoadedAchievements.NeedsToBeSaved = true;
+                }
+
+                Instance.WriteLine($"Successfully locked unlockable {id}");
             });
 
             Commands.children.AddRange(new List<DebugCommandGroup>
@@ -447,7 +658,12 @@ namespace BrutalAPI
                 TP,
                 ENDCOMBAT,
                 PIGMENT,
-                SKIP
+                SKIP,
+                REFRESH,
+                CONSUMEPIGMENT,
+                CHANGENEXTZONEBOSS,
+                UNLOCKCONTENT,
+                LOCKCONTENT
             });
         }
 
@@ -495,6 +711,189 @@ namespace BrutalAPI
                     yield return kvp.Key;
                 }
             }
+        }
+
+        private static IEnumerable<string> LoadBossIds()
+        {
+            var processed = new List<string>();
+
+            foreach (var e in LoadedDBsHandler.EnemyDB.m_EnemyEncounterPool.Values)
+            {
+                if (e == null || e.m_BossSelector == null)
+                    continue;
+
+                var enc = e.m_BossSelector._enemyEncounters;
+
+                if(enc == null)
+                    continue;
+
+                foreach(var en in enc)
+                {
+                    if(en == null || string.IsNullOrEmpty(en.BundleName))
+                        continue;
+
+                    var bundl = LoadedAssetsHandler.GetEnemyBundle(en.BundleName);
+
+                    if (bundl == null || string.IsNullOrEmpty(bundl.BossID) || processed.Contains(bundl.BossID))
+                        continue;
+
+                    yield return bundl.BossID;
+                    processed.Add(bundl.BossID);
+                }
+            }
+        }
+
+        private static Dictionary<string, UnlockableModData> LoadUnlockables()
+        {
+            var dict = new Dictionary<string, UnlockableModData>();
+            var unlocks = LoadedDBsHandler.UnlockablesDB;
+
+            foreach(var c in unlocks.PostCombatChecks)
+            {
+                if(c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if(dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var c in unlocks.CombatGameOverChecks)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var c in unlocks.HardEndingChecks)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var c in unlocks.ZoneExtraChecks)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var c in unlocks.m_ZoneUnlockables.Values)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+                if (dat != null && !string.IsNullOrEmpty(dat.id))
+                    dict[dat.id] = dat;
+
+                var dat2 = c.unlockData;
+                if (dat2 != null && !string.IsNullOrEmpty(dat2.id))
+                    dict[dat2.id] = dat2;
+            }
+
+            foreach (var c in unlocks.m_CharacterDeathUnlockables.Values)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var c in unlocks.m_BeatBossEncounterUnlockables.Values)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var c in unlocks.m_BeatEnemyUnlockables.Values)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.simpleDeathData;
+                if (dat != null && !string.IsNullOrEmpty(dat.id))
+                    dict[dat.id] = dat;
+
+                foreach(var dat2 in c.specialDeathData.Values)
+                {
+                    if (dat2 == null || string.IsNullOrEmpty(dat2.id))
+                        continue;
+
+                    dict[dat2.id] = dat2;
+                }
+            }
+
+            foreach (var c in unlocks.m_FinalBossCharUnlockables.Values)
+            {
+                if (c == null)
+                    continue;
+
+                foreach (var dat in c.entityIDUnlocks.Values)
+                {
+                    if (dat == null || string.IsNullOrEmpty(dat.id))
+                        continue;
+
+                    dict[dat.id] = dat;
+                }
+            }
+
+            foreach (var c in unlocks.m_MiscUnlockables.Values)
+            {
+                if (c == null)
+                    continue;
+
+                var dat = c.unlockData;
+
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            foreach (var dat in unlocks.m_ByIDUnlockables.Values)
+            {
+                if (dat == null || string.IsNullOrEmpty(dat.id))
+                    continue;
+
+                dict[dat.id] = dat;
+            }
+
+            return dict;
         }
 
         private void Awake()
