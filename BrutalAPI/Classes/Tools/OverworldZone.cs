@@ -72,4 +72,257 @@ namespace BrutalAPI
         #endregion
 
     }
+
+    public class BasicOverworldZone
+    {
+        public ZoneBGDataBaseSO zone;
+
+        #region IMPORTANT
+        public string ID
+        {
+            set
+            {
+                zone.name = value;
+                zone._zoneID = value;
+            }
+        }
+        public string ZoneTypeID
+        {
+            set
+            {
+                zone.m_ZoneTypeID = value;
+            }
+        }
+        public string OWEnvironment
+        {
+            set
+            {
+                zone._baseOWEnvironment = value;
+            }
+        }
+        public string CombatEnvironment
+        {
+            set
+            {
+                zone._baseCombatEnvironment = value;
+            }
+        }
+
+        public string StepSoundEvent
+        {
+            set
+            {
+                zone._stepSounds = value;
+            }
+        }
+        public string OverworldMusicEvent
+        {
+            set
+            {
+                zone._overworldMusicEvent = value;
+            }
+        }
+
+        public ZoneLootExperience ZoneLoot
+        {
+            set
+            {
+                zone._zoneLootCalculator = value;
+            }
+        }
+
+        public DeckInfoSO Deck
+        {
+            set
+            {
+                zone._deckInfo = value;
+            }
+        }
+        #endregion
+
+
+
+        #region Rank
+        public int MaxLevelUpRank
+        {
+            set
+            {
+                zone._maxLevelUpRank = value;
+            }
+        }
+        public int EncounterLevelRank
+        {
+            set
+            {
+                zone._encounterLevelRank = value;
+            }
+        }
+
+        public int FoolsLevelRank
+        {
+            set
+            {
+                zone._foolsRank = value;
+            }
+        }
+
+        #endregion
+
+        #region Pools Stuff
+        public List<string> QuestPoolIDs
+        {
+            set
+            {
+                zone._QuestPool = value;
+            }
+        }
+
+        public List<string> SpecialQuestPoolIDs
+        {
+            set
+            {
+                zone._SpecialQuestPool = value;
+            }
+        }
+
+        public List<string> FreeFoolsIDs
+        {
+            set
+            {
+                zone._FreeFoolsPool = value;
+            }
+        }
+
+        public List<string> FlavourPoolIDs
+        {
+            set
+            {
+                zone._FlavourPool = value;
+            }
+        }
+        public List<string> OmittedCharacterIDs
+        {
+            set
+            {
+                zone._omittedCharacters = value;
+            }
+        }
+        #endregion
+
+        #region Money Data
+        public int MinMoneyChestAmount
+        {
+            set
+            {
+                zone._minMoneyChestAmount = value;
+            }
+        }
+        public int MaxMoneyChestAmount
+        {
+            set
+            {
+                zone._maxMoneyChestAmount = value;
+            }
+        }
+        #endregion
+
+        #region Signs
+        public string ShopSignID
+        {
+            set
+            {
+                zone.m_ShopSignID = value;
+            }
+        }
+        public string FoolsSignID
+        {
+            set
+            {
+                zone.m_FoolsSignID = value;
+            }
+        }
+        public string PrizeSignID
+        {
+            set
+            {
+                zone.m_ItemSignID = value;
+            }
+        }
+        public string MoneyChestSignID
+        {
+            set
+            {
+                zone.m_MoneyChestSignID = value;
+            }
+        }
+        #endregion
+
+        #region Rooms
+        public string ShopRoomID
+        {
+            set
+            {
+                zone._shopRoom = value;
+            }
+        }
+        public string FoolsRoomID
+        {
+            set
+            {
+                zone._foolsRoom = value;
+            }
+        }
+        public string PrizeRoomID
+        {
+            set
+            {
+                zone._itemRoom = value;
+            }
+        }
+        public string MoneyChestRoomID
+        {
+            set
+            {
+                zone._moneyChestRoom = value;
+            }
+        }
+        #endregion
+
+        public BasicOverworldZone(string zoneID, string overworld_EnvID, string combat_EnvID, string zoneTypeID = "")
+        {
+            zone = ScriptableObject.CreateInstance<ZoneBGDataBaseSO>();
+            ID = zoneID;
+            ZoneTypeID = (zoneTypeID == "") ? zoneID : zoneTypeID;
+
+            OWEnvironment = overworld_EnvID;
+            CombatEnvironment = combat_EnvID;
+
+            ShopSignID = "Shop";
+            FoolsSignID = "Fools";
+            PrizeSignID = "Prize";
+            MoneyChestSignID = "MoneyChest";
+
+            ShopRoomID = "Shop_Zone01_Room";
+            FoolsRoomID = "Fools_Zone01_Room";
+            PrizeRoomID = "Prize_Room";
+            MoneyChestRoomID = "MoneyChest_Room";
+        }
+
+        public void SetRankData(int maxLevelUpRank, int maxEncounterLevelRank, int foolsLevelRank)
+        {
+            MaxLevelUpRank = maxLevelUpRank;
+            EncounterLevelRank = maxEncounterLevelRank;
+            FoolsLevelRank = foolsLevelRank;
+        }
+        public void SetMoneyChestAmount(int minAmount, int maxAmount)
+        {
+            MinMoneyChestAmount = minAmount;
+            MaxMoneyChestAmount = maxAmount;
+        }
+
+        public void AddZone()
+        {
+            LoadedDBsHandler.MiscDB.AddNewZone(zone._zoneID, zone);
+        }
+    }
 }

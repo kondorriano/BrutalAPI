@@ -72,6 +72,14 @@ namespace BrutalAPI
         static public BaseCombatTargettingSO Unit_OtherAlliesSlots => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_OtherAlliesSlots");
         #endregion
 
+        #region By Unit Side Specific
+        static public BaseCombatTargettingSO Spec_Unit_AllAllies_Strongest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllAllies_Health_Strongest");
+        static public BaseCombatTargettingSO Spec_Unit_AllAllySlots_Strongest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllAllies_Slots_Health_Strongest");
+        static public BaseCombatTargettingSO Spec_Unit_AllOpponents_Strongest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_Health_Strongest");
+        static public BaseCombatTargettingSO Spec_Unit_AllOpponents_Weakest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_Health_Weakest");
+        static public BaseCombatTargettingSO Spec_Unit_OtherAllies_Weakest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_OtherAllies_Health_Weakest");
+        #endregion
+
         #region Generators
         /// <summary>
         /// Creates a simple targeting object. Use <paramref name="slots"/> to mark the slots you want to target. 0 Would be Self or Front. 1 Right, -1 Left.
@@ -117,6 +125,24 @@ namespace BrutalAPI
             t.getAllies = targetAllies;
             t.slotPointerDirections = genericSlots;
 
+            return t;
+        }
+
+        /// <summary>
+        /// Creates Unit targeting with health check.
+        /// Use <paramref name="targetAllies"/> to point out if you are targeting opponents or allies.
+        /// Use <paramref name="ignoreCastSlot"/> to not include the caster.
+        /// Use <paramref name="getAllUnitSlots"/> to include all slots each unit has instead of just one.
+        /// Use <paramref name="getWeakestUnit"/> to select between strongest or weakest health units.
+        /// </summary>
+        public static BaseCombatTargettingSO GenerateUnitTarget_Specific_Health(bool targetAllies = false, bool ignoreCastSlot = false, bool getAllUnitSlots = false, bool getWeakestUnit = false)
+
+        {
+            Targetting_ByUnit_Side_Specific_Health t = ScriptableObject.CreateInstance<Targetting_ByUnit_Side_Specific_Health>();
+            t.getAllies = targetAllies;
+            t.ignoreCastSlot = ignoreCastSlot;
+            t.getAllUnitSlots = getAllUnitSlots;
+            t.getWeakest = getWeakestUnit;
             return t;
         }
         #endregion
