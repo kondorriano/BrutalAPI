@@ -10,6 +10,24 @@ namespace BrutalAPI
     {
         #region ZONE DBs
         /// <summary>
+        /// Adds your custom zone to an in game run mode. 
+        /// </summary>
+        /// <returns></returns>
+        static public void Add_ZoneToInGameRunMode(RunType_GameIDs runID, int zoneIndex, string zoneID, int zoneWeight = 100)
+        {
+            ZoneData data = new ZoneData(zoneID, zoneWeight);
+            LoadedDBsHandler.MiscDB.AddZoneToRunInformation(runID.ToString(), zoneIndex, data);
+        }
+        /// <summary>
+        /// Adds your custom zone to a custom run mode. 
+        /// </summary>
+        /// <returns></returns>
+        static public void Add_ZoneToCustomRunMode(string runID, int zoneIndex, string zoneID, int zoneWeight = 100)
+        {
+            ZoneData data = new ZoneData(zoneID, zoneWeight);
+            LoadedDBsHandler.MiscDB.AddZoneToRunInformation(runID, zoneIndex, data);
+        }
+        /// <summary>
         /// Be careful, if the ID is already in use, it will create the Zone but not add it to the Pool!
         /// </summary>
         /// <returns></returns>
