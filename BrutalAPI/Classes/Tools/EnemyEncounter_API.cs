@@ -12,42 +12,42 @@ namespace BrutalAPI
         /// </summary>
         /// <param name="encounterID">Encounter ID you have set</param>
         /// <param name="priority">The higher this value the easier for this encounter to show</param>
-        public static void AddEncounterToZoneSelector(string encounterID, int priority, ZoneType_GameIDs zoneID, BundleDifficulty difficulty)
+        public static void AddEncounterToZoneSelector(string encounterID, int priority, ZoneType_GameIDs zoneTypeID, BundleDifficulty difficulty)
         {
-            LoadedDBsHandler.EnemyDB.AddBundleToSelector(encounterID, priority, zoneID.ToString(), difficulty);
+            LoadedDBsHandler.EnemyDB.AddBundleToSelector(encounterID, priority, zoneTypeID.ToString(), difficulty);
         }
         /// <summary>
         /// Use this function to add SPECIAL encounters to in game zones.
         /// </summary>
         /// <param name="encounterID">Encounter ID you have set</param>
-        public static void AddEncounterToZoneSpecialSelector(string encounterID, ZoneType_GameIDs zoneID, BundleDifficulty difficulty)
+        public static void AddEncounterToZoneSpecialSelector(string encounterID, ZoneType_GameIDs zoneTypeID, BundleDifficulty difficulty)
         {
-            LoadedDBsHandler.EnemyDB.AddBundleToSpecialSelector(encounterID, zoneID.ToString(), difficulty);
+            LoadedDBsHandler.EnemyDB.AddBundleToSpecialSelector(encounterID, zoneTypeID.ToString(), difficulty);
         }
         /// <summary>
         /// Use this function to add encounters to custom zones.
         /// </summary>
         /// <param name="encounterID">Encounter ID you have set</param>
         /// <param name="priority">The higher this value the easier for this encounter to show</param>
-        /// <param name="zoneID">Your Zone ID</param>
-        public static void AddEncounterToCustomZoneSelector(string encounterID, int priority, string zoneID, BundleDifficulty difficulty)
+        /// <param name="zoneTypeID">Your Zone ID</param>
+        public static void AddEncounterToCustomZoneSelector(string encounterID, int priority, string zoneTypeID, BundleDifficulty difficulty)
         {
-            if (!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneID))
-                OverworldZone.Get_Or_CreateAndAdd_EncounterZonePool(zoneID);
+            if (!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneTypeID))
+                OverworldZone.Get_Or_CreateAndAdd_EncounterZonePool(zoneTypeID);
 
-            LoadedDBsHandler.EnemyDB.AddBundleToSelector(encounterID, priority, zoneID, difficulty);
+            LoadedDBsHandler.EnemyDB.AddBundleToSelector(encounterID, priority, zoneTypeID, difficulty);
         }
         /// <summary>
         /// Use this function to add SPECIAL encounters to custom zones.
         /// </summary>
         /// <param name="encounterID">Encounter ID you have set</param>
         /// <param name="zoneID">Your Zone ID</param>
-        public static void AddEncounterToCustomZoneSpecialSelector(string encounterID, string zoneID, BundleDifficulty difficulty)
+        public static void AddEncounterToCustomZoneSpecialSelector(string encounterID, string zoneTypeID, BundleDifficulty difficulty)
         {
-            if(!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneID))
-                OverworldZone.Get_Or_CreateAndAdd_EncounterZonePool(zoneID);
+            if(!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneTypeID))
+                OverworldZone.Get_Or_CreateAndAdd_EncounterZonePool(zoneTypeID);
 
-            LoadedDBsHandler.EnemyDB.AddBundleToSpecialSelector(encounterID, zoneID, difficulty);
+            LoadedDBsHandler.EnemyDB.AddBundleToSpecialSelector(encounterID, zoneTypeID, difficulty);
         }
     }
     public class EnemyEncounter_API

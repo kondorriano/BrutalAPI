@@ -82,6 +82,10 @@ namespace BrutalAPI
             zone.m_MediumSelector = defaultData.m_MediumSelector.Clone();
             zone.m_HardSelector = defaultData.m_HardSelector.Clone();
             zone.m_SpecialSelector = defaultData.m_SpecialSelector.Clone();
+            zone.m_EasySelector._enemyEncounters.Clear();
+            zone.m_MediumSelector._enemyEncounters.Clear();
+            zone.m_HardSelector._enemyEncounters.Clear();
+            zone.m_SpecialSelector.m_EnemyEncounters.Clear();
 
             enemyDB.AddEnemyEncounterPool(zoneTypeID, zone);
 
@@ -314,6 +318,11 @@ namespace BrutalAPI
 
             OWEnvironment = overworld_EnvID;
             CombatEnvironment = combat_EnvID;
+
+            FlavourPoolIDs = [];
+            QuestPoolIDs = [];
+            FreeFoolsIDs = [];
+            OmittedCharacterIDs = [];
 
             ShopSignID = "Shop";
             FoolsSignID = "Fools";
