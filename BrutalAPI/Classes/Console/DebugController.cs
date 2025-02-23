@@ -65,6 +65,8 @@ namespace BrutalAPI
         public static readonly DebugCommand CHANGENEXTZONEBOSS;
         public static readonly DebugCommand UNLOCKCONTENT;
         public static readonly DebugCommand LOCKCONTENT;
+        public static readonly DebugCommand APPLYSTATUSEFFECT;
+        public static readonly DebugCommand APPLYFIELDEFFECT;
         #endregion
 
         #region Autocomplete
@@ -74,6 +76,8 @@ namespace BrutalAPI
         public static readonly AutocompletionGroup PigmentAutocomplete = new(() => LoadedDBsHandler.PigmentDB.PigmentPool.Keys);
         public static readonly AutocompletionGroup BossAutocomplete = new(LoadBossIds);
         public static readonly AutocompletionGroup UnlocksAutocomplete = new(() => LoadUnlockables().Keys);
+        public static readonly AutocompletionGroup StatusEffectAutocomplete = new(() => LoadedDBsHandler.StatusFieldDB.StatusEffects.Keys);
+        public static readonly AutocompletionGroup FieldEffectAutocomplete = new(() => LoadedDBsHandler.StatusFieldDB.FieldEffects.Keys);
         #endregion
 
         #region Log Colors
@@ -645,6 +649,73 @@ namespace BrutalAPI
                 Instance.WriteLine($"Successfully locked unlockable {id}");
             });
 
+            APPLYSTATUSEFFECT = new("applystatuseffect", "Applies a status effect to an enemy or a character.", new()
+            {
+                new StringCommandArgument("status", StatusEffectAutocomplete),
+                new NumericalCommandArgument("amount"),
+                new NumericalCommandArgument("slot", 0),
+                new BoolCommandArgumnt("applyToCharacters"),
+                new NumericalCommandArgument("restrictor", optional: true)
+            }, args =>
+            {
+                var statusId = args[0].Read<string>();
+                var amount = args[1].Read<int>();
+                var slot = args[2].Read<int>();
+                var characters = args[3].Read<bool>();
+
+                if (!args[4].TryRead<int>(out var restrictor))
+                    restrictor = 0;
+
+                if (!LoadedDBsHandler.StatusFieldDB.TryGetStatusEffect(statusId, out var status))
+                {
+                    Instance.WriteLine($"Invalid status effect \"{statusId}\".");
+                    return;
+                }
+
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    var target = x.combatSlots.GetGenericAllySlotTarget(slot, characters);
+                    if (target == null || !target.HasUnit)
+                        return;
+
+                    var u = target.Unit;
+                    u.ApplyStatusEffect(status, amount, restrictor);
+                }));
+            });
+
+            APPLYFIELDEFFECT = new("applyfieldeffect", "Applies a field effect to an enemy or character slot.", new()
+            {
+                new StringCommandArgument("field", FieldEffectAutocomplete),
+                new NumericalCommandArgument("amount"),
+                new NumericalCommandArgument("slot", 0),
+                new BoolCommandArgumnt("applyToCharacters"),
+                new NumericalCommandArgument("restrictor", optional: true)
+            }, args =>
+            {
+                var fieldId = args[0].Read<string>();
+                var amount = args[1].Read<int>();
+                var slot = args[2].Read<int>();
+                var characters = args[3].Read<bool>();
+
+                if (!args[4].TryRead<int>(out var restrictor))
+                    restrictor = 0;
+
+                if (!LoadedDBsHandler.StatusFieldDB.TryGetFieldEffect(fieldId, out var field))
+                {
+                    Instance.WriteLine($"Invalid field effect \"{fieldId}\".");
+                    return;
+                }
+
+                CombatManager.Instance.AddPriorityRootAction(new PerformDelegateAction(x =>
+                {
+                    var target = x.combatSlots.GetGenericAllySlotTarget(slot, characters);
+                    if (target == null)
+                        return;
+
+                    x.combatSlots.ApplyFieldEffect(target.SlotID, target.IsTargetCharacterSlot, field, amount, restrictor, 1);
+                }));
+            }); 
+
             Commands.children.AddRange(new List<DebugCommandGroup>
             {
                 HELP,
@@ -663,7 +734,9 @@ namespace BrutalAPI
                 CONSUMEPIGMENT,
                 CHANGENEXTZONEBOSS,
                 UNLOCKCONTENT,
-                LOCKCONTENT
+                LOCKCONTENT,
+                APPLYSTATUSEFFECT,
+                APPLYFIELDEFFECT
             });
         }
 
