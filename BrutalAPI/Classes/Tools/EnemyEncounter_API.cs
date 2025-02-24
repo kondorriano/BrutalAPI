@@ -41,7 +41,7 @@ namespace BrutalAPI
         /// Use this function to add SPECIAL encounters to custom zones.
         /// </summary>
         /// <param name="encounterID">Encounter ID you have set</param>
-        /// <param name="zoneID">Your Zone ID</param>
+        /// <param name="zoneTypeID">Your Zone ID</param>
         public static void AddEncounterToCustomZoneSpecialSelector(string encounterID, string zoneTypeID, BundleDifficulty difficulty)
         {
             if(!LoadedDBsHandler.EnemyDB.DoesEncounterPoolExist(zoneTypeID))
