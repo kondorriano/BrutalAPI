@@ -58,6 +58,27 @@ namespace BrutalAPI
                 Debug.LogError($"RoomID {roomID} already in use!");
         }
 
+        public static void Prepare_Bar_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
+        {
+            GameObject asset = fileBundle.LoadAsset<GameObject>(prefabBundlePath);
+            BarRoomHandler handler = asset.AddComponent<BarRoomHandler>();
+            Bar_RoomHandlerModData data = asset.GetComponent<Bar_RoomHandlerModData>();
+
+            handler.m_BarSeats = new List<BarSeat>();
+            foreach (Basic_RoomItemModData item in data.m_BarSeatsSelectable)
+            {
+                BarSeat seat = new BarSeat();
+                seat.m_NPCSelectable = GetRoomItemComponent(handler, item) as BasicRoomItem;
+                seat.m_NPCOptions = new List<BarSeatData>();
+            }
+
+            Misc.Prepare_LocalizedImages(asset);
+
+            bool added = LoadedAssetsHandler.TryAddExternalOWRoom(roomID, handler);
+            if (!added)
+                Debug.LogError($"RoomID {roomID} already in use!");
+        }
+
         public static void Prepare_Treasure_RoomPrefab(string prefabBundlePath, string roomID, AssetBundle fileBundle)
         {
             GameObject asset = fileBundle.LoadAsset<GameObject>(prefabBundlePath);

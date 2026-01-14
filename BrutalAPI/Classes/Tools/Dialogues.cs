@@ -9,14 +9,18 @@ namespace BrutalAPI
     {
         static public void AddCustom_GameOver_BossLines(string bossID, string[] lines)
         {
-            LoadedDBsHandler.GameOverDialogueDB.AddBossLinesData(bossID, lines);
+            LoadedDBsHandler.ExtraDialogueDB.AddBossLinesData(bossID, lines);
         }
 
         static public void AddCustom_GameOver_RandomLines(string[] lines)
         {
-            LoadedDBsHandler.GameOverDialogueDB.AddRandomLinesData(lines);
+            LoadedDBsHandler.ExtraDialogueDB.AddGameOverLinesData(lines);
         }
 
+        static public void AddCustom_ExtraDialogue_Lines(string extraID, string[] lines)
+        {
+            LoadedDBsHandler.ExtraDialogueDB.AddExtraLinesData(extraID, lines);
+        }
 
         #region DialogueDB
         static public void AddCustom_DialogueProgram(string programID, YarnProgram data)

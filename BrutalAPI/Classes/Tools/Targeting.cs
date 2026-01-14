@@ -41,6 +41,7 @@ namespace BrutalAPI
         static public BaseCombatTargettingSO Slot_OpponentFarRight => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentFarRight");
         static public BaseCombatTargettingSO Slot_OpponentFarSides => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentFarSides");
         static public BaseCombatTargettingSO Slot_OpponentFarSidesAndFartherSides => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentFarSidesAndFartherSides");
+        static public BaseCombatTargettingSO Slot_OpponentFarthestSides => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentFarthestSides");
         static public BaseCombatTargettingSO Slot_OpponentLeft => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentLeft");
         static public BaseCombatTargettingSO Slot_OpponentRight => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentRight");
         static public BaseCombatTargettingSO Slot_OpponentSides => LoadedDBsHandler.MiscDB.GetTargeting("SlotTarget_OpponentSides");
@@ -73,10 +74,15 @@ namespace BrutalAPI
         #endregion
 
         #region By Unit Side Specific
+        static public BaseCombatTargettingSO Spec_Unit_AllAllies_All_Status => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllAllies_All_Status");
         static public BaseCombatTargettingSO Spec_Unit_AllAllies_Strongest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllAllies_Health_Strongest");
         static public BaseCombatTargettingSO Spec_Unit_AllAllySlots_Strongest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllAllies_Slots_Health_Strongest");
+        static public BaseCombatTargettingSO Spec_Unit_AllOpponents_All_Status => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_All_Status");
+        static public BaseCombatTargettingSO Spec_Unit_AllOpponents_Furthest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_Distance_Furthest");
+        static public BaseCombatTargettingSO Spec_Unit_AllOpponents_DivineProtection_Status => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_DivineProtection_Status");
         static public BaseCombatTargettingSO Spec_Unit_AllOpponents_Strongest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_Health_Strongest");
         static public BaseCombatTargettingSO Spec_Unit_AllOpponents_Weakest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_Health_Weakest");
+        static public BaseCombatTargettingSO Spec_Unit_AllOpponents_OilSlicked_Status => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_AllOpponents_OilSlicked_Status");
         static public BaseCombatTargettingSO Spec_Unit_OtherAllies_Weakest => LoadedDBsHandler.MiscDB.GetTargeting("UnitTarget_Spec_OtherAllies_Health_Weakest");
         #endregion
 

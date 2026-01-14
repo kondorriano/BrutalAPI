@@ -13,6 +13,8 @@ namespace BrutalAPI
         #region In-Game Passive Gets
         static public BasePassiveAbilitySO Abomination1 => LoadedAssetsHandler.GetPassive("Abomination_1_PA");
         static public BasePassiveAbilitySO Absorb => LoadedAssetsHandler.GetPassive("Absorb_PA");
+        static public BasePassiveAbilitySO Anointed1 => LoadedAssetsHandler.GetPassive("Anointed_1_PA");
+        static public BasePassiveAbilitySO Anointed2 => LoadedAssetsHandler.GetPassive("Anointed_2_PA");
         static public BasePassiveAbilitySO Anchored => LoadedAssetsHandler.GetPassive("Anchored_PA");
         static public BasePassiveAbilitySO BoneSpurs1 => LoadedAssetsHandler.GetPassive("BoneSpurs_1_PA");
         static public BasePassiveAbilitySO BoneSpurs2 => LoadedAssetsHandler.GetPassive("BoneSpurs_2_PA");
@@ -78,6 +80,7 @@ namespace BrutalAPI
         static public BasePassiveAbilitySO Skittish3 => LoadedAssetsHandler.GetPassive("Skittish_3_PA");
         static public BasePassiveAbilitySO Skittish => LoadedAssetsHandler.GetPassive("Skittish_PA");
         static public BasePassiveAbilitySO Slippery => LoadedAssetsHandler.GetPassive("Slippery_PA");
+        static public BasePassiveAbilitySO Theophobia => LoadedAssetsHandler.GetPassive("Theophobia_PA");
         static public BasePassiveAbilitySO Transfusion => LoadedAssetsHandler.GetPassive("Transfusion_PA");
         static public BasePassiveAbilitySO TwoFaced => LoadedAssetsHandler.GetPassive("TwoFaced_PA");
         static public BasePassiveAbilitySO Unstable => LoadedAssetsHandler.GetPassive("Unstable_PA");
