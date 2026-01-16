@@ -87,15 +87,10 @@ namespace BrutalAPI
             DialogueFunctionData data = new DialogueFunctionData(functionName, parameterCount, implementation);
             LoadedDBsHandler.DialogueDB.AddNewOWDialogueFunction(functionName, data);
         }
-        static public void AddNewCombatDialogueFunction(string functionName, int parameterCount, Yarn.ReturningFunction implementation)
+        static public void AddCustom_CombatDialogueFunction(string functionName, int parameterCount, Yarn.ReturningFunction implementation)
         {
             DialogueFunctionData data = new DialogueFunctionData(functionName, parameterCount, implementation);
             LoadedDBsHandler.DialogueDB.AddNewCombatDialogueFunction(functionName, data);
-
-            Dialogues.AddNewCombatDialogueFunction("test", 0, delegate (Yarn.Value[] parameters)
-            {
-                return "do whatever here";
-            });
         }
         #endregion
 
