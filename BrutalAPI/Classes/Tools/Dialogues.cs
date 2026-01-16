@@ -81,6 +81,22 @@ namespace BrutalAPI
             data.name = speakerID;
             LoadedDBsHandler.DialogueDB.AddNewSpeakerData(data.name, data);
         }
+
+        static public void AddCustom_OWDialogueFunction(string functionName, int parameterCount, Yarn.ReturningFunction implementation)
+        {
+            DialogueFunctionData data = new DialogueFunctionData(functionName, parameterCount, implementation);
+            LoadedDBsHandler.DialogueDB.AddNewOWDialogueFunction(functionName, data);
+        }
+        static public void AddNewCombatDialogueFunction(string functionName, int parameterCount, Yarn.ReturningFunction implementation)
+        {
+            DialogueFunctionData data = new DialogueFunctionData(functionName, parameterCount, implementation);
+            LoadedDBsHandler.DialogueDB.AddNewCombatDialogueFunction(functionName, data);
+
+            Dialogues.AddNewCombatDialogueFunction("test", 0, delegate (Yarn.Value[] parameters)
+            {
+                return "do whatever here";
+            });
+        }
         #endregion
 
 

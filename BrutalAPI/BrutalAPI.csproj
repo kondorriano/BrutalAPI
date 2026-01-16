@@ -89,6 +89,9 @@
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>..\..\References\Unity\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
+    <Reference Include="YarnSpinner">
+      <HintPath>..\..\References\Unity\YarnSpinner.dll</HintPath>
+    </Reference>
     <Reference Include="YarnSpinner.Unity">
       <HintPath>..\..\References\Unity\YarnSpinner.Unity.dll</HintPath>
     </Reference>
