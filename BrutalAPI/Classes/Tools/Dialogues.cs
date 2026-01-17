@@ -92,6 +92,17 @@ namespace BrutalAPI
             DialogueFunctionData data = new DialogueFunctionData(functionName, parameterCount, implementation);
             LoadedDBsHandler.DialogueDB.AddNewCombatDialogueFunction(functionName, data);
         }
+
+        static public void AddCustom_OWDialogueCommand(string functionName, DialogueRunner_BO.CommandHandler handler)
+        {
+            DialogueFunctionData data = new DialogueFunctionData(functionName, handler);
+            LoadedDBsHandler.DialogueDB.AddNewOWDialogueCommand(functionName, data);
+        }
+        static public void AddCustom_CombatDialogueCommand(string functionName, DialogueRunner_BO.CommandHandler handler)
+        {
+            DialogueFunctionData data = new DialogueFunctionData(functionName, handler);
+            LoadedDBsHandler.DialogueDB.AddNewCombatDialogueCommand(functionName, data);
+        }
         #endregion
 
 
